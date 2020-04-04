@@ -1,12 +1,20 @@
-package br.com.cmabreu.models;
+package br.com.cmabreu.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import br.com.cmabreu.models.XPlaneAircraft;
+import br.com.cmabreu.udp.XPlaneDataPacket;
 import hla.rti1516e.AttributeHandle;
 import hla.rti1516e.AttributeHandleSet;
 import hla.rti1516e.InteractionClassHandle;
 import hla.rti1516e.ObjectClassHandle;
 import hla.rti1516e.RTIambassador;
 
-public class XPlaneAircraftManager {
+@Service
+public class XPlaneAircraftManagerService {
 	private RTIambassador rtiAmb;
 	private ObjectClassHandle classHandle;
 	private InteractionClassHandle interactionHandle;   
@@ -17,14 +25,17 @@ public class XPlaneAircraftManager {
 	private AttributeHandle attributeForceId; 
 	private AttributeHandle attributeIsConcealed; 
 	private AttributeHandle attributeMarking; 
-
+	private boolean initialized = false;
+	private List<XPlaneAircraft> aircrafts;
 	
-	public XPlaneAircraftManager( RTIambassador rtiAmb ) throws Exception {
+	public void init( RTIambassador rtiAmb ) throws Exception {
+		if( isInitialized() ) return;
+		this.aircrafts = new ArrayList<XPlaneAircraft>();
 		this.rtiAmb = rtiAmb;
 		this.classHandle = rtiAmb.getObjectClassHandle("BaseEntity.PhysicalEntity.Platform.Aircraft");
 		this.publish();
+		this.initialized = true;
 	}
-
 	
 	private void publish() throws Exception {
 		this.attributeEntityType = this.rtiAmb.getAttributeHandle( this.classHandle, "EntityType");        
@@ -149,6 +160,36 @@ public class XPlaneAircraftManager {
 
 	public void setAttributeMarking(AttributeHandle attributeMarking) {
 		this.attributeMarking = attributeMarking;
+	}
+	
+	public boolean isInitialized() {
+		return initialized;
+	}
+
+	
+	public void update( XPlaneDataPacket dataPacket ) throws Exception {
+		// Identifica o dado pelo nome do computador que enviou
+		String identificador = dataPacket.getHostName() ;
+		
+		// Procura na minha lista pra ver se eh uma aeronave nova
+		for( XPlaneAircraft ac : aircrafts  ) {
+			
+			if( ac.isMe(identificador) ) {
+				// Ja tenho essa cadastrada. So atualiza os seus dados e sai
+				ac.update(dataPacket);
+				return;
+			}
+			
+		}
+		
+		// Se eu cheguei aqui eh porque nao tenho essa aeronave ainda.
+		// Preciso criar uma nova.
+		XPlaneAircraft temp = new XPlaneAircraft( this, identificador );
+		this.aircrafts.add( temp );
+		
+		// E ja atualizo suas informacoes!
+		temp.update(dataPacket);
+		
 	}
 	
 	

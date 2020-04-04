@@ -1,24 +1,19 @@
 package br.com.cmabreu.udp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import br.com.cmabreu.udp.processors.PacketProcessor;
+import br.com.cmabreu.services.XPlaneAircraftManagerService;
 
 public class XPlaneDataProcessor {
-	private PacketProcessor pp;
-	private Logger logger = LoggerFactory.getLogger( XPlaneDataProcessor.class );
+	// private Logger logger = LoggerFactory.getLogger( XPlaneDataProcessor.class );
 	
-	public XPlaneDataProcessor() {
-		this.pp = new PacketProcessor();
-	}
-	
-	public synchronized void process( XPlaneDataPacket dataPacket ) {
-		logger.info( dataPacket.getHostName() );
-		
-		for( XPlaneData data : dataPacket.getData() ) {
-			pp.processPacket( data );
-		}		            
+    @Autowired
+    XPlaneAircraftManagerService xplaneManager;
+
+	public synchronized void process( XPlaneDataPacket dataPacket ) throws Exception {
+		// Atualizo se ja existir ou crio uma nova.
+		// A identificacao da aeronave vem do dataPacket.getHostName() 
+		xplaneManager.update(dataPacket);
 		
 	}
 

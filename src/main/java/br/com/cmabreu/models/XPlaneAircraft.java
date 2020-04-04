@@ -1,5 +1,8 @@
 package br.com.cmabreu.models;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import br.com.cmabreu.datatypes.EntityIdentifierStruct;
 import br.com.cmabreu.datatypes.EntityIdentifierStructEncoder;
 import br.com.cmabreu.datatypes.EntityTypeStruct;
@@ -14,6 +17,9 @@ import br.com.cmabreu.datatypes.SpatialFPStructEncoder;
 import br.com.cmabreu.datatypes.VelocityVectorStruct;
 import br.com.cmabreu.datatypes.WorldLocationStruct;
 import br.com.cmabreu.misc.CoordinateConversions;
+import br.com.cmabreu.services.XPlaneAircraftManagerService;
+import br.com.cmabreu.udp.XPlaneData;
+import br.com.cmabreu.udp.XPlaneDataPacket;
 import edu.nps.moves.disenum.CountryType;
 import edu.nps.moves.disenum.EntityDomain;
 import edu.nps.moves.disenum.EntityKind;
@@ -27,7 +33,7 @@ import hla.rti1516e.encoding.HLAoctet;
 
 public class XPlaneAircraft {
 	private ObjectInstanceHandle objectInstanceHandle;
-	private XPlaneAircraftManager manager;
+	private XPlaneAircraftManagerService manager;
 	private EncoderFactory encoderFactory;
 	private EntityTypeStruct entityType;
 	private Integer forceId;
@@ -37,11 +43,21 @@ public class XPlaneAircraft {
 	private double latitude;
 	private double longitude;
 	private double altitude;
+	private Logger logger = LoggerFactory.getLogger( XPlaneAircraft.class );
+	private String identificador;
 	
-	public XPlaneAircraft( XPlaneAircraftManager manager ) throws Exception {
+	
+	public boolean isMe( String identificador ) {
+		return identificador.equals( this.identificador );
+	}
+	
+	public XPlaneAircraft( XPlaneAircraftManagerService manager, String identificador ) throws Exception {
 		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getClassHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
 		this.manager = manager;
+		this.identificador = identificador;
+		
+		// Ajusta os valores default
 		
 		this.entityType = new EntityTypeStruct( 
 				EntityKind.PLATFORM.value, 
@@ -60,7 +76,9 @@ public class XPlaneAircraft {
         this.longitude = -45.108200517635815;
         this.altitude = 7.0;
         
+        // Envia ao RTI os valores default
         updateAllValues();
+        logger.info("Nova aeronave '"+ identificador + "' pronta em " + latitude + "," + longitude + " " + altitude);
 	}
 	
 	public void updateAllValues() throws Exception {
@@ -98,6 +116,12 @@ public class XPlaneAircraft {
         
 		
 		this.manager.getRtiAmb().updateAttributeValues( objectInstanceHandle, attributes, null); 		
+	}
+	
+	public void update( XPlaneDataPacket dataPacket ) {
+		for( XPlaneData data : dataPacket.getData() ) {
+			System.out.println("  > " + data.toString() );
+		}		            
 	}
 	
 	

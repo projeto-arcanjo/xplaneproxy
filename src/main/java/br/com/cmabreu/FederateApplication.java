@@ -11,5 +11,5 @@ public class FederateApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(FederateApplication.class, args);
 	}
-	
+
 }

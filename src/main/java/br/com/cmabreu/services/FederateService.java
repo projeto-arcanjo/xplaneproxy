@@ -4,19 +4,19 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.com.cmabreu.FederateAmbassador;
 import br.com.cmabreu.FederateExecutorThread;
 import br.com.cmabreu.misc.EncoderDecoder;
-import br.com.cmabreu.models.XPlaneAircraft;
-import br.com.cmabreu.models.XPlaneAircraftManager;
-import br.com.cmabreu.udp.UDPServer;
+import br.com.cmabreu.udp.UDPServerThread;
 import hla.rti1516e.CallbackModel;
-import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 import hla.rti1516e.ResignAction;
 import hla.rti1516e.RtiFactoryFactory;
@@ -34,7 +34,8 @@ public class FederateService {
 	private FederateAmbassador fedamb;  			
 	private Logger logger = LoggerFactory.getLogger( FederateService.class );
 	private EncoderDecoder encoder;	
-	
+	private Runnable udpServerThread;
+	private Runnable federateExecutorThread;
 	
     @Value("${federation.fomfolder}")
     String fomFolder;	
@@ -44,15 +45,17 @@ public class FederateService {
     
     @Value("${federation.federateName}")
     String federateName;	
+
+    @Autowired
+    XPlaneAircraftManagerService xplaneManager;
     
-    public void startUPDListener() {
-    	int port = 49003;
-    	new UDPServer( port ).start();
-    }
+	@PreDestroy
+	public void onExit() {
+		logger.info("Encerando Federado...");
+		this.quit();
+	}
     
     public void startRti() throws Exception {
-    	// Inicia o servidor UDP para ouvir o X-Plane
-    	startUPDListener();
     	
     	if( !fomFolder.endsWith("/") ) fomFolder = fomFolder + "/";
     	
@@ -73,6 +76,11 @@ public class FederateService {
 		joinFederation( federationName, federateName);
 		
 		
+		////////////////////////////
+		// 5. Inicializa          //
+		////////////////////////////		
+		xplaneManager.init( rtiamb );
+		
 		//////////////////////////////
 		// 8. publish               //
 		//////////////////////////////
@@ -86,13 +94,17 @@ public class FederateService {
 		// 10. do the main simulation loop //
 		/////////////////////////////////////
 		// Do not block the web browser interface!
-		Runnable runnable = new FederateExecutorThread( this );
-		Thread thread = new Thread(runnable);
-		thread.start();
+		this.federateExecutorThread = new FederateExecutorThread( this );
+		new Thread( this.federateExecutorThread ).start();
 		
+		
+    	// Inicia o servidor UDP para ouvir o X-Plane
+    	this.udpServerThread = new UDPServerThread( 49003 );
+    	new Thread( this.udpServerThread ).start(); 
 		
     }
 
+    
     public void evokeCallBacks() {
     	try {
 			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
@@ -108,6 +120,10 @@ public class FederateService {
 	// This now can be called by a REST endpoint. See FederateController.quit()
     public void quit()  {
 	
+    	( (FederateExecutorThread)this.federateExecutorThread ).finish();
+    	( (UDPServerThread)this.udpServerThread ).finish();
+    	
+    	
 		////////////////////////////////////
 		// 12. resign from the federation //
 		////////////////////////////////////
@@ -219,17 +235,10 @@ public class FederateService {
 		return ( "XPLANE_" + System.currentTimeMillis()).getBytes();
 	}	
 	
-	
-	public void publish() throws RTIexception {
-		try {
-			
-			XPlaneAircraftManager xplaneManager = new XPlaneAircraftManager( rtiamb );
-			XPlaneAircraft xplane01 = new XPlaneAircraft( xplaneManager );
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}	
+	public void publish() throws Exception {
+		// Quem vai publicar uma aeronave eh o software X-Plane quando enviar dados.
+		// Até la, nada de aviao por aqui.
+	}
 	
 	
 }

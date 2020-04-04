@@ -8,14 +8,10 @@ public class XPlaneData {
 	private Long index;
 	private List<XPlaneValue> values;
 	
-	
 	public XPlaneData(String hexIndex, Long index) {
 		this.values = new ArrayList<XPlaneValue>();
 		this.hexIndex = hexIndex;
 		this.index = index;
-		
-		//System.out.println( hexIndex + " [" + index  + "] : ");
-
 	}
 
 	public void put( XPlaneValue value) {

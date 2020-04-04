@@ -2,21 +2,31 @@ package br.com.cmabreu.udp;
 
 public class MainTest {
 
-/*	
-	
-__lat,__deg |   __lon,__deg |   __alt,ftmsl |   __alt,ftagl |   ___on,runwy |   __alt,__ind |   __lat,south |   __lon,_west | 
-------------|---------------|---------------|---------------|---------------|---------------|---------------|---------------|
-   47.50037 |    -122.21684 |       4.87364 |       0.35146 |       1.00000 |       4.87439 |      46.00000 |    -124.00000 | 	
-	
-*/	
-	public static void main(String[] args) {
-		byte[] by = {3,5,6,7};
-		XPlaneDataPacket dtp = new XPlaneDataPacket( "fdfdfd", by );
+	private static void testReceive() {
+		XPlaneDataPacket dtp = new XPlaneDataPacket( "fdfdfd", "dsdsd".getBytes() );
 		
-		for( XPlaneData data : dtp.getData() ) {
-			System.out.println( "Indice " + data.getIndex() + " : [ " + data.toString() + " ]");
+		String msg = "444154412A140000006E53B7C124A72CC2964B54403AC9883E0000803F0E4B54400000B4C100002CC214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C2";
+		dtp.processMessage(msg);
+		
+		new XPlaneDataProcessor().process(dtp);
+	}
+	
+	private static void testSend() {
+		int port = 49003;
+		String msg = "444154412A140000006E53B7C124A72CC2964B54403AC9883E0000803F0E4B54400000B4C100002CC214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C2";
+		try {
+			UDPClient client = new UDPClient( "localhost", port );
+			client.sendEcho(msg);
+			client.close();
+		} catch ( Exception e ) {
+			e.printStackTrace();
 		}
-		
+	}
+	
+	
+	public static void main(String[] args) {
+		testSend();
+		testReceive();
 	}
 
 }

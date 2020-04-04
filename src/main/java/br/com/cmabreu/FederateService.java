@@ -25,7 +25,7 @@ import hla.rti1516e.exceptions.RTIinternalError;
 @Service
 public class FederateService {
 	private RTIambassador rtiamb;
-	private FederateAmbassador fedamb;  			// created when we connect
+	private FederateAmbassador fedamb;  			
 	private Logger logger = LoggerFactory.getLogger( FederateService.class );
 	
 	
@@ -48,9 +48,8 @@ public class FederateService {
     }
     
     public void startRti() throws Exception {
-    	
+    	// Inicia o servidor UDP para ouvir o X-Plane
     	startUPDListener();
-    	
     	
     	if( !fomFolder.endsWith("/") ) fomFolder = fomFolder + "/";
     	

@@ -32,7 +32,6 @@ public class XPlaneDataPacket {
 
 	public void processMessage( String msg ) {
 		int packetHexaSize = 36 * 2;
-		//msg = "444154412A140000006E53B7C124A72CC2964B54403AC9883E0000803F0E4B54400000B4C100002CC214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C214000000D2BC3D42749CF4C203CFA9434DE28B3E0000803FF677A94300003E420000F4C2";
 		msg = msg.substring( 5 * 2 ); // remove 5 primeiros bytes em hexa
 		
 		List<String> dataPackets = splitAfterNChars( msg, packetHexaSize ); // decompoe a string em pacotes de 36 bytes
@@ -46,7 +45,7 @@ public class XPlaneDataPacket {
 					XPlaneData dta = new XPlaneData( reverseHex( packetIndex ), index );
 					List<String> packetDataBytes = splitAfterNChars( packetData, 8); // decompoe o dado em pacotes de 4 bytes
 					for( String dataBytes : packetDataBytes ) {
-						XPlaneValue val = new XPlaneValue( hexToFloat( reverseHex( dataBytes ) ), reverseHex( dataBytes ), dataBytes );
+						XPlaneValue val = new XPlaneValue( dataBytes );
 						dta.put( val );
 					}
 					this.data.add( dta );
@@ -81,14 +80,6 @@ public class XPlaneDataPacket {
 		}
 		return new String(hexChars);
 	}
-	
-	
-	private float hexToFloat(String myString) {
-		Long i = Long.parseLong(myString,16);
-		Float f = Float.intBitsToFloat(i.intValue());
-		return f;
-	}    
-    
 	
 
 }

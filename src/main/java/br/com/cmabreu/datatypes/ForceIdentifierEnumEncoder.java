@@ -1,26 +1,18 @@
 package br.com.cmabreu.datatypes;
 
-import hla.rti1516e.RtiFactory;
 import hla.rti1516e.RtiFactoryFactory;
-import hla.rti1516e.encoding.EncoderFactory;
 import hla.rti1516e.encoding.HLAoctet;
 
 public class ForceIdentifierEnumEncoder {
-	private EncoderFactory encoderFactory;
-	private HLAoctet forceIdEncoder = encoderFactory.createHLAoctet();
+	private HLAoctet forceIdEncoder;
 	
-	public ForceIdentifierEnumEncoder() {
+	public ForceIdentifierEnumEncoder( int forceId ) {		
 		try {
-			RtiFactory rtiFactory = RtiFactoryFactory.getRtiFactory();
-			encoderFactory = rtiFactory.getEncoderFactory(); 
+			forceIdEncoder = RtiFactoryFactory.getRtiFactory().getEncoderFactory().createHLAoctet();
 		} catch (Exception RTIinternalError) {
 			//
 		}
-	}	
-	
-	
-	public ForceIdentifierEnumEncoder( int forceId) {		
-		forceIdEncoder.setValue( (byte)forceId );     //3 eh pra ser uma variavel qualquer	associada a forceId	
+		forceIdEncoder.setValue( (byte)forceId );   
 	}	
 
     public byte[] toByteArray() {    	

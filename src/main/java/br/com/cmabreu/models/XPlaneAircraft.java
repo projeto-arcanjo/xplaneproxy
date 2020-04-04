@@ -34,14 +34,14 @@ public class XPlaneAircraft {
 	private EntityIdentifierStruct entityIdentifier;
 	private int isConcealed;
 	private MarkingStruct marking;
-	private long latitude;
-	private long longitude;
-	private long altitude;
+	private double latitude;
+	private double longitude;
+	private double altitude;
 	
 	public XPlaneAircraft( XPlaneAircraftManager manager ) throws Exception {
 		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getClassHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
-		
+		this.manager = manager;
 		
 		this.entityType = new EntityTypeStruct( 
 				EntityKind.PLATFORM.value, 
@@ -56,16 +56,15 @@ public class XPlaneAircraft {
 		this.entityIdentifier = new EntityIdentifierStruct( 3001, 101, 102 );
 		this.isConcealed = 0;
         this.marking = new MarkingStruct(1,"TesteXplane");
-        this.latitude = Long.valueOf("-23.0946534902203");
-        this.longitude = Long.valueOf("-45.108200517635815");
-        this.altitude = Long.valueOf("7.0");
+        this.latitude = -23.0946534902203;
+        this.longitude = -45.108200517635815;
+        this.altitude = 7.0;
         
         updateAllValues();
 	}
 	
 	public void updateAllValues() throws Exception {
-		AttributeHandleValueMap attributes;
-		attributes = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(6);
+		AttributeHandleValueMap attributes = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(6);
 
 		
 		// Encoda os atributos

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 public class FederateApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(FederateApplication.class, args);
+		SpringApplication.run( FederateApplication.class, args );
 	}
 
 }

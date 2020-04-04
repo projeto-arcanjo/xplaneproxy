@@ -3,6 +3,8 @@ package br.com.cmabreu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.cmabreu.services.FederateService;
+
 public class FederateExecutorThread implements Runnable {
 	private Logger logger = LoggerFactory.getLogger( FederateExecutorThread.class );
 	private FederateService federateService;
@@ -14,13 +16,12 @@ public class FederateExecutorThread implements Runnable {
 	
 	@Override
 	public void run(  ) {
+		logger.info("Executando processo principal");
 		
-		try {
-			federateService.kickOff();
-		} catch( Exception e ) {
-			logger.error( e.getCause() + " : " +  e.getMessage() );
-		}		
-		
+		while(true) {
+			//federateService.evokeCallBacks();	
+		}
+				
 	}
 
 }

@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.cmabreu.FederateExecutorThread;
-import br.com.cmabreu.FederateService;
+import br.com.cmabreu.services.FederateService;
 
 @RestController
 public class FederateController {
@@ -20,9 +19,9 @@ public class FederateController {
 
     // In original code the Federation was destroyed after the main loop.
     // Now we must destroy it by calling this endpoint
-    @RequestMapping(value = "/destroyfederation", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
-	public @ResponseBody String destroyFederation() {
-    	federateService.destroyFederation();
+    @RequestMapping(value = "/quit", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
+	public @ResponseBody String quit() {
+    	federateService.quit();
     	return "ok";
 	}
 	
@@ -37,20 +36,6 @@ public class FederateController {
 		return "ok";
 	}
 
-    	
-    	
-    // This will replace the user input to start the simulation
-	@RequestMapping(value = "/start", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
-	public @ResponseBody String start () {
-
-		// Do not block the web browser interface!
-		Runnable runnable = new FederateExecutorThread( federateService );
-		Thread thread = new Thread(runnable);
-		thread.start();
-		
-		return "OK";
-	}	
-	
 	
 }
 

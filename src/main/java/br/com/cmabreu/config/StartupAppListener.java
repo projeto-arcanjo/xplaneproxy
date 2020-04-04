@@ -5,7 +5,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import br.com.cmabreu.FederateService;
+import br.com.cmabreu.services.FederateService;
 
 @Component
 public class StartupAppListener implements ApplicationListener<ContextRefreshedEvent> {

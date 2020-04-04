@@ -1,6 +1,9 @@
 package br.com.cmabreu.datatypes;
 
 
+// SISO-REF-010-2019
+
+
 public class EntityTypeStruct {
 	private byte entityKind;
 	private byte domain;
@@ -10,14 +13,14 @@ public class EntityTypeStruct {
 	private byte specific;
 	private byte extra;        
 	
-    public EntityTypeStruct(int a, int b , int c, int d, int e, int f, int g){
-    	entityKind = (byte) a;
-    	domain =(byte) b;
-    	countryCode =(byte) c;
-    	category =(byte) d;
-    	subCategory =(byte) e;
-    	specific = (byte)f;
-    	extra = (byte)g;
+    public EntityTypeStruct(int entityKind, int domain , int countryCode, int category, int subCategory, int specific, int extra){
+    	this.entityKind = (byte) entityKind;
+    	this.domain =(byte) domain;
+    	this.countryCode =(byte) countryCode;
+    	this.category =(byte) category;
+    	this.subCategory =(byte) subCategory;
+    	this.specific = (byte)specific;
+    	this.extra = (byte)extra;
     }    
     
 	public byte getentityKind() {

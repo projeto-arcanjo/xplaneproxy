@@ -119,7 +119,7 @@ public class Aircraft {
 	 		     EntityTypeStructEncoder entityTypeStructEncoder = new EntityTypeStructEncoder(entityTypeStruct);
 	          ///////////// Force Identifier         
 	          	 ForceIdentifierEnum forceIdEnum = ForceIdentifierEnum.NEUTRAL;
-	          	 ForceIdentifierEnumEncoder forceIdEnumEncoder = new ForceIdentifierEnumEncoder(forceIdEnum);
+	          	 ForceIdentifierEnumEncoder forceIdEnumEncoder = new ForceIdentifierEnumEncoder(0);
 	          /////////////// Entity Identifier                  	 
 	          	 EntityIdentifierStruct entityIdentifierStruct = new EntityIdentifierStruct(3001,101,102);
 	          	 EntityIdentifierStructEncoder entityIdentifierStructEncoder = new EntityIdentifierStructEncoder(entityIdentifierStruct);

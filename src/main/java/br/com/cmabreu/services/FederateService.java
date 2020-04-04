@@ -1,4 +1,4 @@
-package br.com.cmabreu;
+package br.com.cmabreu.services;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -6,20 +6,26 @@ import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import br.com.cmabreu.misc.Constants;
+import br.com.cmabreu.FederateAmbassador;
+import br.com.cmabreu.FederateExecutorThread;
+import br.com.cmabreu.misc.EncoderDecoder;
+import br.com.cmabreu.models.XPlaneAircraft;
+import br.com.cmabreu.models.XPlaneAircraftManager;
 import br.com.cmabreu.udp.UDPServer;
 import hla.rti1516e.CallbackModel;
 import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
+import hla.rti1516e.ResignAction;
 import hla.rti1516e.RtiFactoryFactory;
+import hla.rti1516e.exceptions.CallNotAllowedFromWithinCallback;
 import hla.rti1516e.exceptions.FederatesCurrentlyJoined;
 import hla.rti1516e.exceptions.FederationExecutionAlreadyExists;
 import hla.rti1516e.exceptions.FederationExecutionDoesNotExist;
 import hla.rti1516e.exceptions.NotConnected;
+import hla.rti1516e.exceptions.RTIexception;
 import hla.rti1516e.exceptions.RTIinternalError;
 
 @Service
@@ -27,6 +33,7 @@ public class FederateService {
 	private RTIambassador rtiamb;
 	private FederateAmbassador fedamb;  			
 	private Logger logger = LoggerFactory.getLogger( FederateService.class );
+	private EncoderDecoder encoder;	
 	
 	
     @Value("${federation.fomfolder}")
@@ -37,10 +44,6 @@ public class FederateService {
     
     @Value("${federation.federateName}")
     String federateName;	
-    
-    @Autowired
-    private FederateManager federateManager;
-    
     
     public void startUPDListener() {
     	int port = 49003;
@@ -70,103 +73,63 @@ public class FederateService {
 		joinFederation( federationName, federateName);
 		
 		
-		////////////////////////////////
-		// 5. announce the sync point //
-		////////////////////////////////
-		// announce a sync point to get everyone on the same page. if the point
-		// has already been registered, we'll get a callback saying it failed,
-		// but we don't care about that, as long as someone registered it
-		rtiamb.registerFederationSynchronizationPoint( Constants.READY_TO_RUN, null );		
-		
-		// wait until the point is announced
-		while( federateManager.isAnnounced == false ) {
-			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
-			logger.info("Still waiting for announce");
-		}
-		
-    }
-    
-	public void kickOff() throws Exception {
-		
-		///////////////////////////////////////////////////////
-		// 6. achieve the point and wait for synchronization //
-		///////////////////////////////////////////////////////
-		// tell the RTI we are ready to move past the sync point and then wait
-		// until the federation has synchronized on
-		rtiamb.synchronizationPointAchieved( Constants.READY_TO_RUN );
-		logger.info( "Achieved sync point: " + Constants.READY_TO_RUN + ", waiting for federation..." );
-		while( federateManager.isReadyToRun == false ) {
-			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
-		}
-		
-		/////////////////////////////
-		// 7. enable time policies //
-		/////////////////////////////
-		// in this section we enable/disable all time policies
-		// note that this step is optional!
-		federateManager.enableTimePolicy();
-		logger.info( "Time Policy Enabled" );		
-		
-		
 		//////////////////////////////
-		// 8. publish and subscribe //
+		// 8. publish               //
 		//////////////////////////////
 		// in this section we tell the RTI of all the data we are going to
 		// produce, and all the data we want to know about
-		federateManager.publishAndSubscribe();
-		logger.info( "Published and Subscribed" );		
-		
-		/////////////////////////////////////
-		// 9. register an object to update //
-		/////////////////////////////////////		
-		ObjectInstanceHandle objectHandle = federateManager.registerObjectInstance();
-		logger.info( "Registered Object, handle=" + objectHandle );
-		
+		publish();
+		logger.info( "Published" );		
+
 		
 		/////////////////////////////////////
 		// 10. do the main simulation loop //
 		/////////////////////////////////////
-		// here is where we do the meat of our work. in each iteration, we will
-		// update the attribute values of the object we registered, and will
-		// send an interaction.
-		for( int i = 0; i < Constants.ITERATIONS; i++ ) {
-			// 9.1 update the attribute values of the instance //
-			federateManager.updateAttributeValues( objectHandle );
-			
-			// 9.2 send an interaction
-			federateManager.sendInteraction();
-			
-			// 9.3 request a time advance and wait until we get it
-			federateManager.advanceTime( 1.0 );
-			logger.info( "Time Advanced to " + federateManager.federateTime );
-		}
+		// Do not block the web browser interface!
+		Runnable runnable = new FederateExecutorThread( this );
+		Thread thread = new Thread(runnable);
+		thread.start();
+		
+		
+    }
 
-		
-		//////////////////////////////////////
-		// 11. delete the object we created //
-		//////////////////////////////////////
-		//deleteObjectInstance( HLA1516eHandle.fromHandle( objectHandle ) );  
-		
-		
+    public void evokeCallBacks() {
+    	try {
+			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
+		} catch ( CallNotAllowedFromWithinCallback e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch ( RTIinternalError e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+	// This now can be called by a REST endpoint. See FederateController.quit()
+    public void quit()  {
+	
 		////////////////////////////////////
 		// 12. resign from the federation //
 		////////////////////////////////////
-		//resignFederationExecution();
-		
-	}
-	
-	// This now can be called by a REST endpoint. See FederateController.resignFederationExecution()
-	public void resignFederationExecution() throws Exception {
-		federateManager.resignFederationExecution();
-		logger.info( "Resigned from Federation" );		
-	}
-	
-	
+		try {
+			resignFederationExecution();
+			destroyFederation();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    }
+    
 	// This now can be called by a REST endpoint. See FederateController.deleteObjectInstance()
 	public void deleteObjectInstance( int objectHandle ) throws Exception {
-		federateManager.deleteObjectInstance( objectHandle );
+		rtiamb.deleteObjectInstance( encoder.getObjectHandle( objectHandle ), generateTag() );
 		logger.info( "Deleted Object, handle=" + objectHandle );
 	}
+
+	public void resignFederationExecution() throws Exception {
+		rtiamb.resignFederationExecution( ResignAction.DELETE_OBJECTS );
+	}	
 
 	
 	// This method now will be fired by a REST endpoint. See FederateController.destroyFederation()
@@ -204,13 +167,12 @@ public class FederateService {
 	private void createRtiAmbassador() throws Exception {
 		logger.info( "Creating RTIambassador." );
 		this.rtiamb = RtiFactoryFactory.getRtiFactory().getRtiAmbassador();
-		logger.info( "Initializing the Manager." );
-		federateManager.initialize( this.rtiamb );
+		encoder = new EncoderDecoder();
 	}   
 	
 	private void connect() throws Exception {
 		logger.info( "Connecting..." );
-		fedamb = new FederateAmbassador( federateManager );
+		fedamb = new FederateAmbassador( this );
 		rtiamb.connect( fedamb, CallbackModel.HLA_IMMEDIATE );
 	}	
 	
@@ -222,6 +184,10 @@ public class FederateService {
 			URL[] modules = new URL[]{
 				// The MIM file MUST be present	
 				(new File( fomFolder + "HLAstandardMIM.xml")).toURI().toURL(),
+				(new File( fomFolder + "RPR_FOM_v2.0_1516-2010.xml")).toURI().toURL(),
+				(new File( fomFolder + "NETN-Base_v1.0.2.xml")).toURI().toURL(),
+				(new File( fomFolder + "NETN-Aggregate_v1.0.4.xml")).toURI().toURL(),
+				(new File( fomFolder + "NETN-Physical_v1.1.2.xml")).toURI().toURL(),
 			};
 			rtiamb.createFederationExecution( federationName, modules );
 			logger.info( "Created Federation. HLA Version " + rtiamb.getHLAversion() );
@@ -233,18 +199,37 @@ public class FederateService {
 			return;
 		}
 	}	
+
 	
 	private void joinFederation( String federationName, String federateName ) throws Exception  {
-		URL[] joinModules = new URL[]{
-			( new File( fomFolder + "RestaurantSoup.xml" ) ).toURI().toURL()
-		};
-		rtiamb.joinFederationExecution( federateName, "ExampleFederateType", federationName, joinModules );   
+		rtiamb.joinFederationExecution( federateName, "ExampleFederateType", federationName );   
 		logger.info( "Joined Federation as " + federateName );
-		
-		// cache the time factory for easy access
-		federateManager.setTimeFactory();
-		
 	}	
 
+	
+	public EncoderDecoder getEncoder() {
+		return encoder;
+	}
+	
+	public void sendInteraction() throws RTIexception	{
+		// rtiamb.sendInteraction( servedHandle, parameters, generateTag(), time );
+	}	
+
+	private byte[] generateTag() {
+		return ( "XPLANE_" + System.currentTimeMillis()).getBytes();
+	}	
+	
+	
+	public void publish() throws RTIexception {
+		try {
+			
+			XPlaneAircraftManager xplaneManager = new XPlaneAircraftManager( rtiamb );
+			XPlaneAircraft xplane01 = new XPlaneAircraft( xplaneManager );
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+	
 	
 }

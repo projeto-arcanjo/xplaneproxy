@@ -106,7 +106,6 @@ public class XPlaneAircraft {
 
         
         double[] arrayPosition = CoordinateConversions.getXYZfromLatLonDegrees( latitude, longitude, altitude );
-        
         WorldLocationStruct worldLocation = new WorldLocationStruct( arrayPosition[0], arrayPosition[1], arrayPosition[2] );
         VelocityVectorStruct velocityVectorStruct = new VelocityVectorStruct(0.5415523,-0.5452158,-1.1100446);
         OrientationStruct orientationStruct = new OrientationStruct(-12.183228,-7.050103e+07,0.0);
@@ -120,9 +119,46 @@ public class XPlaneAircraft {
 	
 	public void update( XPlaneDataPacket dataPacket ) {
 		for( XPlaneData data : dataPacket.getData() ) {
-			System.out.println("  > " + data.toString() );
+			
+			// 20 : LatLongAlt
+			if( data.getIndex() == 20 ) {
+				updateLatLongAlt( data );
+			}
+			
 		}		            
 	}
+
+	
+	// Envia posicao vinda do X-Plane para a RTI
+	private void updateLatLongAlt( XPlaneData data ) {
+		
+		// Latitude
+		this.latitude = data.getValues().get(0).getValue();
+		// Longitude
+		this.longitude = data.getValues().get(1).getValue();
+		// Altitude
+		this.altitude = data.getValues().get(3).getValue();
+		
+		System.out.println( latitude +  ", " + longitude + " || " + altitude );
+		
+		try {
+			AttributeHandleValueMap attributes = this.manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 1 );
+	
+			double[] arrayPosition = CoordinateConversions.getXYZfromLatLonDegrees( this.latitude, this.longitude, this.altitude );
+	        WorldLocationStruct worldLocation = new WorldLocationStruct( arrayPosition[0], arrayPosition[1], arrayPosition[2] );
+	        VelocityVectorStruct velocityVectorStruct = new VelocityVectorStruct(0.5415523,-0.5452158,-1.1100446);
+	        OrientationStruct orientationStruct = new OrientationStruct(-12.183228,-7.050103e+07,0.0);
+	        SpatialFPStruct spatialFPStruct = new SpatialFPStruct(worldLocation,RPRboolean.False,velocityVectorStruct,orientationStruct);
+	        SpatialFPStructEncoder spatialFPStructEncoder = new SpatialFPStructEncoder(spatialFPStruct);
+	        attributes.put( this.manager.getAttributeSpatial(), spatialFPStructEncoder.toByteArray());       
+	        
+			this.manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, attributes, null);
+			
+		} catch ( Exception e ) {
+			logger.error("Erro ao atualizar posicao: " + e.getMessage() );
+		}
+	}
+	
 	
 	
 }

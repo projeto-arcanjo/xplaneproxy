@@ -45,6 +45,9 @@ public class FederateService {
     @Value("${federation.federateName}")
     String federateName;	
 
+    @Value("${udpserver.port}")
+    Integer udpServerPort; 
+    
 	@PreDestroy
 	public void onExit() {
 		logger.info("Encerando Federado...");
@@ -95,7 +98,7 @@ public class FederateService {
 		
 		
     	// Inicia o servidor UDP para ouvir o X-Plane
-    	this.udpServerThread = new UDPServerThread( 49003 );
+    	this.udpServerThread = new UDPServerThread( udpServerPort );
     	new Thread( this.udpServerThread ).start(); 
 		
     }

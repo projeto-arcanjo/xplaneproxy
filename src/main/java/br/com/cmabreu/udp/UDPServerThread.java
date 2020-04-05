@@ -9,6 +9,8 @@ import java.nio.ByteOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.com.cmabreu.services.XPlaneAircraftManager;
+
 public class UDPServerThread implements Runnable {
     private DatagramSocket socket;
     private boolean running;
@@ -16,7 +18,6 @@ public class UDPServerThread implements Runnable {
 	private ByteBuffer byteBuffer;
 	private Logger logger = LoggerFactory.getLogger( UDPServerThread.class );
 	private int port;
-	private XPlaneDataProcessor processor;
 	
 	public void finish() {
 		this.socket.close();
@@ -25,7 +26,6 @@ public class UDPServerThread implements Runnable {
 	
     public UDPServerThread( int port ) {
     	this.port = port;
-    	this.processor = new XPlaneDataProcessor();
     	try {
     		socket = new DatagramSocket( port );
     	} catch ( Exception e ) {
@@ -44,7 +44,9 @@ public class UDPServerThread implements Runnable {
 	            socket.receive( packet );
 	            byteBuffer = ByteBuffer.wrap( buffer ).order( ByteOrder.LITTLE_ENDIAN );
 	            XPlaneDataPacket dtp = new XPlaneDataPacket( packet.getAddress().getHostName(), byteBuffer.array() );
-	            this.processor.process(dtp);
+	            
+	            XPlaneAircraftManager.getInstance().update( dtp );
+	            
         	} catch( SocketException se ) {
         		logger.error( se.getMessage() );
         	} catch( Exception e ) {

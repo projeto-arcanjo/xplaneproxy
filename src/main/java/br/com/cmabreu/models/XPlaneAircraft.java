@@ -17,7 +17,7 @@ import br.com.cmabreu.datatypes.SpatialFPStructEncoder;
 import br.com.cmabreu.datatypes.VelocityVectorStruct;
 import br.com.cmabreu.datatypes.WorldLocationStruct;
 import br.com.cmabreu.misc.CoordinateConversions;
-import br.com.cmabreu.services.XPlaneAircraftManagerService;
+import br.com.cmabreu.services.XPlaneAircraftManager;
 import br.com.cmabreu.udp.XPlaneData;
 import br.com.cmabreu.udp.XPlaneDataPacket;
 import edu.nps.moves.disenum.CountryType;
@@ -33,7 +33,7 @@ import hla.rti1516e.encoding.HLAoctet;
 
 public class XPlaneAircraft {
 	private ObjectInstanceHandle objectInstanceHandle;
-	private XPlaneAircraftManagerService manager;
+	private XPlaneAircraftManager manager;
 	private EncoderFactory encoderFactory;
 	private EntityTypeStruct entityType;
 	private Integer forceId;
@@ -51,7 +51,7 @@ public class XPlaneAircraft {
 		return identificador.equals( this.identificador );
 	}
 	
-	public XPlaneAircraft( XPlaneAircraftManagerService manager, String identificador ) throws Exception {
+	public XPlaneAircraft( XPlaneAircraftManager manager, String identificador ) throws Exception {
 		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getClassHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
 		this.manager = manager;

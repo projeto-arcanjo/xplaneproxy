@@ -3,7 +3,8 @@ package br.com.cmabreu.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import br.com.cmabreu.models.XPlaneAircraft;
 import br.com.cmabreu.udp.XPlaneDataPacket;
@@ -13,8 +14,7 @@ import hla.rti1516e.InteractionClassHandle;
 import hla.rti1516e.ObjectClassHandle;
 import hla.rti1516e.RTIambassador;
 
-@Service
-public class XPlaneAircraftManagerService {
+public class XPlaneAircraftManager {
 	private RTIambassador rtiAmb;
 	private ObjectClassHandle classHandle;
 	private InteractionClassHandle interactionHandle;   
@@ -25,17 +25,26 @@ public class XPlaneAircraftManagerService {
 	private AttributeHandle attributeForceId; 
 	private AttributeHandle attributeIsConcealed; 
 	private AttributeHandle attributeMarking; 
-	private boolean initialized = false;
 	private List<XPlaneAircraft> aircrafts;
+	private static XPlaneAircraftManager instance;
+	private Logger logger = LoggerFactory.getLogger( XPlaneAircraftManager.class );
 	
-	public void init( RTIambassador rtiAmb ) throws Exception {
-		if( isInitialized() ) return;
+	public static XPlaneAircraftManager getInstance() {
+		return instance;
+	}
+	
+	public static void startInstance( RTIambassador rtiAmb ) throws Exception {
+		instance = new XPlaneAircraftManager( rtiAmb );
+	}
+	
+	private XPlaneAircraftManager( RTIambassador rtiAmb ) throws Exception {
+		logger.info("X-Plane Aircraft Manager ativo");
 		this.aircrafts = new ArrayList<XPlaneAircraft>();
 		this.rtiAmb = rtiAmb;
 		this.classHandle = rtiAmb.getObjectClassHandle("BaseEntity.PhysicalEntity.Platform.Aircraft");
 		this.publish();
-		this.initialized = true;
 	}
+	
 	
 	private void publish() throws Exception {
 		this.attributeEntityType = this.rtiAmb.getAttributeHandle( this.classHandle, "EntityType");        
@@ -161,11 +170,6 @@ public class XPlaneAircraftManagerService {
 	public void setAttributeMarking(AttributeHandle attributeMarking) {
 		this.attributeMarking = attributeMarking;
 	}
-	
-	public boolean isInitialized() {
-		return initialized;
-	}
-
 	
 	public void update( XPlaneDataPacket dataPacket ) throws Exception {
 		// Identifica o dado pelo nome do computador que enviou

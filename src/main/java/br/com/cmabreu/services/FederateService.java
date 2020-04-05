@@ -8,7 +8,6 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -46,9 +45,6 @@ public class FederateService {
     @Value("${federation.federateName}")
     String federateName;	
 
-    @Autowired
-    XPlaneAircraftManagerService xplaneManager;
-    
 	@PreDestroy
 	public void onExit() {
 		logger.info("Encerando Federado...");
@@ -56,6 +52,8 @@ public class FederateService {
 	}
     
     public void startRti() throws Exception {
+    	// O Manager precisa ser assim para que possa ser acessado pelo UDPServerThread 
+    	// ( ele nao tem o RTIAmbassador que eh necessario para instanciar o Manager )
     	
     	if( !fomFolder.endsWith("/") ) fomFolder = fomFolder + "/";
     	
@@ -75,11 +73,9 @@ public class FederateService {
 		////////////////////////////		
 		joinFederation( federationName, federateName);
 		
+
 		
-		////////////////////////////
-		// 5. Inicializa          //
-		////////////////////////////		
-		xplaneManager.init( rtiamb );
+		XPlaneAircraftManager.startInstance( rtiamb );
 		
 		//////////////////////////////
 		// 8. publish               //

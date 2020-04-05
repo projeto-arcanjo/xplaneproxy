@@ -6,7 +6,7 @@ docker run --name xplaneproxy --hostname=xplaneproxy --network arcanjo \
 	-v /etc/localtime:/etc/localtime:ro \
 	-p 36000:8080 \
 	-p 49003:49003/udp \
-	-d magnoabreu/xplaneproxy:1.0	
+	-d projetoarcanjo/xplaneproxy:1.0	
 
 
 

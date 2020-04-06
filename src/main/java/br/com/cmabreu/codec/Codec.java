@@ -5,6 +5,7 @@ import hla.rti1516e.encoding.EncoderFactory;
 import hla.rti1516e.encoding.HLAfixedRecord;
 import hla.rti1516e.encoding.HLAfloat32BE;
 import hla.rti1516e.encoding.HLAfloat64BE;
+import hla.rti1516e.encoding.HLAinteger16BE;
 import hla.rti1516e.encoding.HLAoctet;
 import hla.rti1516e.encoding.HLAvariantRecord;
 
@@ -15,12 +16,11 @@ import hla.rti1516e.encoding.HLAvariantRecord;
 public class Codec {
 
 	EncoderFactory encoderFactory;
-	HLAfixedRecord EntityTypeStruct;
+	
 	HLAvariantRecord<HLAoctet> SpatialVariantStruct;
 	HLAfixedRecord SpatialFixedStruct; //portico
-	HLAoctet forceIdentifier;
-	HLAfixedRecord MarkingStruct;
-	HLAoctet isConcealed;
+	
+	
 	boolean useSpatialVariantDecoder;  // false for Portico
 
 	public Codec(EncoderFactory encoderFactory) {
@@ -28,7 +28,6 @@ public class Codec {
 		this.useSpatialVariantDecoder = (encoderFactory.createHLAvariantRecord(encoderFactory.createHLAoctet()) != null);
 
 		this.encoderFactory = encoderFactory;
-		this.EntityTypeStruct = createEntityTypeDecoder();
 
 		if (useSpatialVariantDecoder) {
 			this.SpatialVariantStruct = createSpatialVariantDecoder();
@@ -38,18 +37,38 @@ public class Codec {
 			this.SpatialFixedStruct = createSpatialFixedDecoder();
 		}
 
-		this.forceIdentifier = createForceIdentifierDecoder(); 
-		this.isConcealed = encoderFactory.createHLAoctet();
-		this.MarkingStruct = createMarkingDecoder();
 	}
 
+	private HLAfixedRecord createEntityIdentifierDecoder() {
+		HLAfixedRecord EntityIdentifierStruct = encoderFactory.createHLAfixedRecord();
+		HLAinteger16BE siteId = encoderFactory.createHLAinteger16BE();
+		HLAinteger16BE applicationId = encoderFactory.createHLAinteger16BE();
+		HLAinteger16BE entityNumber = encoderFactory.createHLAinteger16BE();
+		EntityIdentifierStruct.add(siteId);
+		EntityIdentifierStruct.add(applicationId);
+		EntityIdentifierStruct.add(entityNumber);
+		return EntityIdentifierStruct;
+	}
+	
+	
 	private HLAfixedRecord createEntityTypeDecoder() {
 		// EntityTypeStruct
-		EntityTypeStruct = encoderFactory.createHLAfixedRecord();
-
-		for (int i = 0; i < EntityType.TOTAL_FIELDS; i++) {
-			EntityTypeStruct.add(encoderFactory.createHLAoctet());
-		}
+		HLAfixedRecord EntityTypeStruct = encoderFactory.createHLAfixedRecord();
+		HLAoctet entityKind = encoderFactory.createHLAoctet();
+		HLAoctet domain = encoderFactory.createHLAoctet();
+		HLAoctet countryCode = encoderFactory.createHLAoctet();
+		HLAoctet category = encoderFactory.createHLAoctet();
+		HLAoctet subCategory = encoderFactory.createHLAoctet();
+		HLAoctet specific = encoderFactory.createHLAoctet();
+		HLAoctet extra = encoderFactory.createHLAoctet();
+		
+		EntityTypeStruct.add( entityKind );
+		EntityTypeStruct.add( domain );
+		EntityTypeStruct.add( countryCode );
+		EntityTypeStruct.add( category );
+		EntityTypeStruct.add( subCategory );
+		EntityTypeStruct.add( specific );
+		EntityTypeStruct.add( extra );
 
 		return EntityTypeStruct;
 	}
@@ -245,36 +264,44 @@ public class Codec {
 	}
 
 	private HLAfixedRecord createMarkingDecoder() {
-		MarkingStruct = encoderFactory.createHLAfixedRecord();
-
+		HLAfixedRecord MarkingStruct = encoderFactory.createHLAfixedRecord();
 		// MarkingEncodingEnum8
 		MarkingStruct.add(encoderFactory.createHLAoctet());
-
 		// MarkingArray11
 		for (int i = 0; i < Marking.MARKING_LENGTH; i++) {
 			MarkingStruct.add(encoderFactory.createHLAoctet());
 		}
-
 		return MarkingStruct;
 	}
 
 	public EntityType decodeEntityType(byte[] bytes) throws DecoderException {
+		HLAfixedRecord EntityTypeStruct = createEntityTypeDecoder();
 		// decode
 		EntityTypeStruct.decode(bytes);
-
 		EntityType et = new EntityType();
-		byte[] field = new byte[EntityType.TOTAL_FIELDS];
-
-		for (int i = 0; i < EntityType.TOTAL_FIELDS; i++) {
-			field[i] = ((HLAoctet) EntityTypeStruct.get(i)).getValue();
-		}
-
-		et.setField(field);
-
+		et.setEntityKind( ((HLAoctet) EntityTypeStruct.get( 0 ) ).getValue() );
+		et.setDomain( ((HLAoctet) EntityTypeStruct.get( 1 ) ).getValue() );
+		et.setCountryCode( ((HLAoctet) EntityTypeStruct.get( 2 ) ).getValue() );
+		et.setCategory( ((HLAoctet) EntityTypeStruct.get( 3 ) ).getValue() );
+		et.setSubCategory( ((HLAoctet) EntityTypeStruct.get( 4 ) ).getValue() );
+		et.setSpecific( ((HLAoctet) EntityTypeStruct.get( 5 ) ).getValue() );
+		et.setExtra( ((HLAoctet) EntityTypeStruct.get( 6 ) ).getValue() );
 		return et;
 	}
+	
+	public byte[] encodeEntityType( EntityType et ) {
+		HLAfixedRecord EntityTypeStruct = createEntityTypeDecoder();
+		((HLAoctet) EntityTypeStruct.get(0)).setValue( et.getEntityKind() );
+		((HLAoctet) EntityTypeStruct.get(1)).setValue( et.getDomain() );
+		((HLAoctet) EntityTypeStruct.get(2)).setValue( et.getCountryCode() );
+		((HLAoctet) EntityTypeStruct.get(3)).setValue( et.getCategory() );
+		((HLAoctet) EntityTypeStruct.get(4)).setValue( et.getSubCategory() );
+		((HLAoctet) EntityTypeStruct.get(5)).setValue( et.getSpecific() );
+		((HLAoctet) EntityTypeStruct.get(6)).setValue( et.getExtra() );
+		return EntityTypeStruct.toByteArray();		
+	}
 
-	private SpatialVariant decodeSpatialFixed(byte[] bytes) throws DecoderException {
+	private synchronized SpatialVariant decodeSpatialFixed(byte[] bytes) throws DecoderException {
 		// decode
 		SpatialFixedStruct.decode(bytes);
 
@@ -404,7 +431,7 @@ public class Codec {
 		return sv;
 	}
 
-	private byte[] encodeSpatialFixed(SpatialVariant sv) throws DecoderException {
+	private synchronized byte[] encodeSpatialFixed(SpatialVariant sv) throws DecoderException {
 
 		// set the discriminant
 		((HLAoctet) SpatialFixedStruct.get(0)).setValue(sv.getDiscriminator());
@@ -529,7 +556,7 @@ public class Codec {
 		return SpatialFixedStruct.toByteArray();
 	}
 
-	public SpatialVariant decodeSpatialVariant(byte[] bytes) throws DecoderException {
+	public synchronized SpatialVariant decodeSpatialVariant(byte[] bytes) throws DecoderException {
 		if (!useSpatialVariantDecoder) {
 			return decodeSpatialFixed(bytes);
 		}
@@ -663,7 +690,7 @@ public class Codec {
 		return sv;
 	}
 
-	public byte[] encodeSpatialVariant(SpatialVariant sv) throws DecoderException {
+	public synchronized byte[] encodeSpatialVariant(SpatialVariant sv) throws DecoderException {
 		if (!this.useSpatialVariantDecoder) {
 			return this.encodeSpatialFixed(sv);
 		}
@@ -792,30 +819,61 @@ public class Codec {
 	}
 
 	public ForceIdentifier decodeForceIdentifier(byte[] bytes) throws DecoderException {
+		HLAoctet forceIdentifier = createForceIdentifierDecoder();
 		forceIdentifier.decode(bytes);
 		ForceIdentifier forceId = new ForceIdentifier();
 		forceId.setForceId(forceIdentifier.getValue());
 		return forceId;
 	}
-
+	
+	
+	public byte[] encodeEntityIdentifier( EntityIdentifier ei ) throws DecoderException {
+		HLAfixedRecord EntityIdentifierStruct = createEntityIdentifierDecoder();
+		((HLAinteger16BE) EntityIdentifierStruct.get(0)).setValue( ei.getSideId() );
+		((HLAinteger16BE) EntityIdentifierStruct.get(1)).setValue( ei.getApplicationId() );
+		((HLAinteger16BE) EntityIdentifierStruct.get(2)).setValue( ei.getEntityNumber() );
+		return EntityIdentifierStruct.toByteArray();
+	}
+	
+	public EntityIdentifier decoderEntityIdentifier( byte[] bytes ) throws DecoderException {
+		HLAfixedRecord EntityIdentifierStruct = createEntityIdentifierDecoder();
+		EntityIdentifierStruct.decode( bytes );
+		HLAinteger16BE sideId = (HLAinteger16BE)EntityIdentifierStruct.get(0);
+		HLAinteger16BE applicationId = (HLAinteger16BE)EntityIdentifierStruct.get(1);
+		HLAinteger16BE entityNumber = (HLAinteger16BE)EntityIdentifierStruct.get(2);
+		EntityIdentifier ei = new EntityIdentifier( sideId.getValue(), applicationId.getValue(), entityNumber.getValue() );
+		return ei;
+	}
+	
+	
 	public byte[] encodeForceIdentifier(ForceIdentifier forceId) throws DecoderException {
+		HLAoctet forceIdentifier = createForceIdentifierDecoder();
 		forceIdentifier.setValue(forceId.getForceId());
 		return forceIdentifier.toByteArray();
 	}
 	
-	public byte[] encodeIsConcealed( byte isConcealed) throws DecoderException{
-        this.isConcealed.setValue( isConcealed );
-        return this.isConcealed.toByteArray();
+	public byte[] encodeIsConcealed( byte isConcealedVal ) throws DecoderException{
+		HLAoctet isConcealed = encoderFactory.createHLAoctet();
+        isConcealed.setValue( isConcealedVal );
+        return isConcealed.toByteArray();
 	}
 
+	public byte decodeIsConcealed( byte[] bytes ) throws DecoderException {
+		HLAoctet isConcealed = encoderFactory.createHLAoctet();
+		isConcealed.decode( bytes );
+		return isConcealed.getValue();
+	}
+	
 	public Marking decodeMarking(byte[] bytes) throws DecoderException {
+		HLAfixedRecord MarkingStruct = createMarkingDecoder();
+				
 		// decode
 		MarkingStruct.decode(bytes);
 
 		Marking m = new Marking("");
 		char[] data = new char[Marking.MARKING_LENGTH];
 
-		byte coding = ((HLAoctet) MarkingStruct.get(0)).getValue();
+		//byte coding = ((HLAoctet) MarkingStruct.get(0)).getValue();
 
 		for (int i = 0; i < Marking.MARKING_LENGTH; i++) {
 			data[i] = (char) ((HLAoctet) MarkingStruct.get(i + 1)).getValue();
@@ -825,7 +883,9 @@ public class Codec {
 		return m;
 	}
 
-	public byte[] encodeMarkding(Marking m) {
+	public byte[] encodeMarking(Marking m) {
+		HLAfixedRecord MarkingStruct = createMarkingDecoder();
+
 		((HLAoctet) MarkingStruct.get(0)).setValue((byte) 0);
 
 		char[] data = m.getText().toCharArray();

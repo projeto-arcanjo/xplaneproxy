@@ -9,114 +9,83 @@ import edu.nps.moves.disenum.PlatformAir;
  *
  * @author bergtwvd
  */
-public class EntityType implements Comparable {
-
-	// define fields
-	public final static byte ENTITYKIND = 	(byte) EntityKind.PLATFORM.value;
-	public final static byte DOMAIN = 		(byte) EntityDomain.AIR.value;
-	public final static byte COUNTRYCODE = 	(byte) CountryType.BRAZIL.value;
-	public final static byte CATEGORY = 	(byte) PlatformAir.ATTACK_HELICOPTER.value;
-	public final static byte SUBCATEGORY = 	13;	// Nao sei o que eh
-	public final static byte SPECIFIC = 	3;	// Nao sei o que eh
-	public final static byte EXTRA = 		0;	// Nao sei o que eh
+public class EntityType  {
+	private byte entityKind =	(byte) EntityKind.PLATFORM.value;
+	private byte domain = 		(byte) EntityDomain.AIR.value;
+	private byte countryCode = 	(byte) CountryType.BRAZIL.value;
+	private byte category = 	(byte) PlatformAir.ATTACK_HELICOPTER.value;
+	private byte subCategory = 	13;	// Nao sei o que eh
+	private byte specific = 	3;	// Nao sei o que eh
+	private byte extra = 		0;	// Nao sei o que eh
 	
-	public final static byte TOTAL_FIELDS = 7;
-
-	// define domain names
-	public final static String DOMAIN_NAME[] = {"Other", "Land", "Air", "Surface", "Subsurface", "Space"};
-
-	byte[] field;		// the entity type fields
-	String fieldStr;	// the fields in String format
-
 	public EntityType() {
-		newEntityType(null);
-	}
-
-	public EntityType(String value) {
-		newEntityType(value);
-	}
-
-	private void newEntityType(String value) {
-		field = new byte[TOTAL_FIELDS];
-
-		String sval[] = (value != null) ? value.split("\\.", 7) : new String[0];
-		for (int i = 0; i < sval.length; i++) {
-			sval[i] = (sval[i] == null) ? null : sval[i].trim();
-			try {
-				field[i] = (sval[i] == null || sval[i].isEmpty()) ? 0 : Byte.parseByte(sval[i]);
-			} catch (NumberFormatException e) {
-				field[i] = 0;
-			}
-		}
-
-		// fill the rest up with zeros
-		for (int i = sval.length; i < field.length; i++) {
-			field[i] = 0;
-		}
-		
-		// ensure domain is within bounds
-		if (field[DOMAIN] < 0) field[DOMAIN] += 128;
-		field[DOMAIN] %= DOMAIN_NAME.length;
-
-		createString();
-	}
-
-	public byte[] getField() {
-		return this.field;
-	}
-
-	public void setField(byte[] field) {
-		this.field = field;
-		
-		// ensure domain is within bounds
-		if (field[DOMAIN] < 0) field[DOMAIN] += 128;
-		field[DOMAIN] %= DOMAIN_NAME.length;
-		
-		createString();
-	}
-
-	// this compareTo to:
-	// return -1: this enumeration is more restrictive
-	// return +1: this enumeration is less restrictive
-	// return 0: otherwise
-	@Override
-	public int compareTo(Object o) {
-		EntityType e = (EntityType) o;
-
-		for (int i = field.length - 1; i >= 0; i--) {
-			if (field[i] == e.field[i]) {
-				continue;
-			} else if (field[i] == 0) {
-				return +1;
-			} else {
-				return -1;
-			}
-		}
-		return 0;
-	}
-
-	// test if e is compatible with this enumeration
-	public boolean isCompatible(EntityType e) {
-		for (int i = field.length - 1; i >= 0; i--) {
-			if (this.field[i] != 0) {
-				if (this.field[i] != e.field[i]) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return this.fieldStr;
+		//
 	}
 	
-	private void createString() {
-		this.fieldStr = "" + Byte.toUnsignedInt(field[0]);
-		for (int i = 1; i < EntityType.TOTAL_FIELDS; i++) {
-			this.fieldStr += "." + Byte.toUnsignedInt(field[i]);
-		}
+	public EntityType(byte entityKind, byte domain, byte countryCode, byte category, byte subCategory, byte specific, byte extra) {
+		this.entityKind = entityKind;
+		this.domain = domain;
+		this.countryCode = countryCode;
+		this.category = category;
+		this.subCategory = subCategory;
+		this.specific = specific;
+		this.extra = extra;
 	}
 
+	public byte getEntityKind() {
+		return entityKind;
+	}
+
+	public void setEntityKind(byte entityKind) {
+		this.entityKind = entityKind;
+	}
+
+	public byte getDomain() {
+		return domain;
+	}
+
+	public void setDomain(byte domain) {
+		this.domain = domain;
+	}
+
+	public byte getCountryCode() {
+		return countryCode;
+	}
+
+	public void setCountryCode(byte countryCode) {
+		this.countryCode = countryCode;
+	}
+
+	public byte getCategory() {
+		return category;
+	}
+
+	public void setCategory(byte category) {
+		this.category = category;
+	}
+
+	public byte getSubCategory() {
+		return subCategory;
+	}
+
+	public void setSubCategory(byte subCategory) {
+		this.subCategory = subCategory;
+	}
+
+	public byte getSpecific() {
+		return specific;
+	}
+
+	public void setSpecific(byte specific) {
+		this.specific = specific;
+	}
+
+	public byte getExtra() {
+		return extra;
+	}
+
+	public void setExtra(byte extra) {
+		this.extra = extra;
+	}
+	
 }

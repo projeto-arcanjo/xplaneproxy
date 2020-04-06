@@ -26,8 +26,8 @@ public class XPlaneAircraftManager {
 	protected AttributeHandle spatialHandle;
 	protected AttributeHandle forceIdentifierHandle;
 	protected AttributeHandle markingHandle;	
-	protected AttributeHandle isConcealedHandle;	
-	
+	protected AttributeHandle isConcealedHandle;
+	protected AttributeHandle entityIdentifierHandle;
 	
 	private List<XPlaneAircraft> aircrafts;
 	private static XPlaneAircraftManager instance;
@@ -57,7 +57,7 @@ public class XPlaneAircraftManager {
 		this.forceIdentifierHandle = this.rtiAmb.getAttributeHandle(entityHandle, "ForceIdentifier");
 		this.markingHandle = this.rtiAmb.getAttributeHandle(entityHandle, "Marking");
 		this.isConcealedHandle = this.rtiAmb.getAttributeHandle(entityHandle, "IsConcealed");
-		
+		this.entityIdentifierHandle = this.rtiAmb.getAttributeHandle(entityHandle, "EntityIdentifier");
 		
 		// package the information into a handle set
 		attributes = this.rtiAmb.getAttributeHandleSetFactory().create();
@@ -78,6 +78,13 @@ public class XPlaneAircraftManager {
 		return rtiAmb;
 	}
 
+	public AttributeHandle getEntityIdentifierHandle() {
+		return entityIdentifierHandle;
+	}
+
+	public void setEntityIdentifierHandle(AttributeHandle entityIdentifierHandle) {
+		this.entityIdentifierHandle = entityIdentifierHandle;
+	}
 
 	public void setRtiAmb(RTIambassador rtiAmb) {
 		this.rtiAmb = rtiAmb;

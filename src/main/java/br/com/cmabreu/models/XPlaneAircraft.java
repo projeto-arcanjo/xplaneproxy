@@ -13,7 +13,11 @@ import br.com.cmabreu.misc.Environment;
 import br.com.cmabreu.services.XPlaneAircraftManager;
 import br.com.cmabreu.udp.XPlaneData;
 import br.com.cmabreu.udp.XPlaneDataPacket;
+import edu.nps.moves.disenum.CountryType;
+import edu.nps.moves.disenum.EntityDomain;
+import edu.nps.moves.disenum.EntityKind;
 import edu.nps.moves.disenum.ForceID;
+import edu.nps.moves.disenum.PlatformAir;
 import hla.rti1516e.AttributeHandleValueMap;
 import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RtiFactoryFactory;
@@ -54,7 +58,17 @@ public class XPlaneAircraft {
 		
 		// Seta as variaveis internas
 		this.entityIdentifier = new EntityIdentifier( 3001, 101, 102 );
-		this.entityType = new EntityType();
+		
+		this.entityType = new EntityType(  
+				(byte) EntityKind.PLATFORM.value,
+				(byte) EntityDomain.AIR.value,
+				(byte) CountryType.BRAZIL.value,
+				(byte) PlatformAir.ATTACK_HELICOPTER.value,
+				(byte) 13, 
+				(byte) 3, 
+				(byte) 0 
+		);
+		
 		this.spatialVariant = new SpatialVariant();
 		this.forceIdentifier = new ForceIdentifier( (byte)ForceID.NEUTRAL.value );
 		this.marking = new Marking( "TesteXplane" );
@@ -87,10 +101,17 @@ public class XPlaneAircraft {
 		// Force ID
 		byte[] encodedForceId = this.codec.encodeForceIdentifier( this.forceIdentifier );
 		
-		
 		// Concealed
         byte[] encodedConcealed = this.codec.encodeIsConcealed( this.isConcealed );
 		
+        // Marking
+		byte[] encodedMarking = this.codec.encodeMarking( this.marking );
+        
+		// Entity Identifier
+		byte[] encodedEntityIdentifier = this.codec.encodeEntityIdentifier( this.entityIdentifier );
+		
+		// Entity Type
+		byte[] encodedEntityType = this.codec.encodeEntityType( this.entityType );
 		
 		// Cria o pacote de atributos
 		// *********  FALTA OS OUTROS ***********
@@ -98,6 +119,9 @@ public class XPlaneAircraft {
 		ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
 		ahvm.put( manager.getIsConcealedHandle(), encodedConcealed );
 		ahvm.put( manager.getForceIdentifierHandle(), encodedForceId );
+		ahvm.put( manager.getMarkingHandle(), encodedMarking );
+		ahvm.put( manager.getEntityIdentifierHandle(), encodedEntityIdentifier );
+		ahvm.put( manager.getEntityTypeHandle(), encodedEntityType );
 		
 		
 		// ENVIA O UPDATE PARA A RTI

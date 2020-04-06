@@ -1,16 +1,16 @@
-package br.com.cmabreu.datatypes;
+package br.com.cmabreu.codec;
 
-public class EntityIdentifierStruct {
+public class EntityIdentifier {
 	private short sideId;
 	private short applicationId;
 	private short entityNumber;
 	
-	public EntityIdentifierStruct(short a, short b, short c) {
+	public EntityIdentifier(short a, short b, short c) {
 		sideId = a;
 		applicationId = b;
 		entityNumber = c;	
 	}
-	public EntityIdentifierStruct(int a, int b, int c) {
+	public EntityIdentifier(int a, int b, int c) {
 		sideId = (short) a;
 		applicationId = (short) b;
 		entityNumber = (short) c;	

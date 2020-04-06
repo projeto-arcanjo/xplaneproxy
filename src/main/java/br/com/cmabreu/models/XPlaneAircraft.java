@@ -3,48 +3,41 @@ package br.com.cmabreu.models;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.cmabreu.datatypes.EntityIdentifierStruct;
-import br.com.cmabreu.datatypes.EntityIdentifierStructEncoder;
-import br.com.cmabreu.datatypes.EntityTypeStruct;
-import br.com.cmabreu.datatypes.EntityTypeStructEncoder;
-import br.com.cmabreu.datatypes.ForceIdentifierEnumEncoder;
-import br.com.cmabreu.datatypes.MarkingStruct;
-import br.com.cmabreu.datatypes.MarkingStructEncoder;
-import br.com.cmabreu.datatypes.OrientationStruct;
-import br.com.cmabreu.datatypes.RPRboolean;
-import br.com.cmabreu.datatypes.SpatialFPStruct;
-import br.com.cmabreu.datatypes.SpatialFPStructEncoder;
-import br.com.cmabreu.datatypes.VelocityVectorStruct;
-import br.com.cmabreu.datatypes.WorldLocationStruct;
-import br.com.cmabreu.misc.CoordinateConversions;
+import br.com.cmabreu.codec.Codec;
+import br.com.cmabreu.codec.EntityIdentifier;
+import br.com.cmabreu.codec.EntityType;
+import br.com.cmabreu.codec.ForceIdentifier;
+import br.com.cmabreu.codec.Marking;
+import br.com.cmabreu.codec.SpatialVariant;
+import br.com.cmabreu.misc.Environment;
 import br.com.cmabreu.services.XPlaneAircraftManager;
 import br.com.cmabreu.udp.XPlaneData;
 import br.com.cmabreu.udp.XPlaneDataPacket;
-import edu.nps.moves.disenum.CountryType;
-import edu.nps.moves.disenum.EntityDomain;
-import edu.nps.moves.disenum.EntityKind;
 import edu.nps.moves.disenum.ForceID;
-import edu.nps.moves.disenum.PlatformAir;
 import hla.rti1516e.AttributeHandleValueMap;
 import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RtiFactoryFactory;
 import hla.rti1516e.encoding.EncoderFactory;
-import hla.rti1516e.encoding.HLAoctet;
 
 public class XPlaneAircraft {
 	private ObjectInstanceHandle objectInstanceHandle;
 	private XPlaneAircraftManager manager;
 	private EncoderFactory encoderFactory;
-	private EntityTypeStruct entityType;
-	private Integer forceId;
-	private EntityIdentifierStruct entityIdentifier;
-	private int isConcealed;
-	private MarkingStruct marking;
+	private Environment env;
+	private Codec codec;
+	
+	private EntityType entityType;
+	private SpatialVariant spatialVariant;
+	private ForceIdentifier forceIdentifier;
+	private EntityIdentifier entityIdentifier;
+	private Marking marking;
+	private byte isConcealed;
+	
 	private double latitude;
 	private double longitude;
 	private double altitude;
-	private Logger logger = LoggerFactory.getLogger( XPlaneAircraft.class );
 	private String identificador;
+	private Logger logger = LoggerFactory.getLogger( XPlaneAircraft.class );
 	
 	
 	public boolean isMe( String identificador ) {
@@ -52,69 +45,64 @@ public class XPlaneAircraft {
 	}
 	
 	public XPlaneAircraft( XPlaneAircraftManager manager, String identificador ) throws Exception {
-		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getClassHandle() );
+		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getEntityHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
 		this.manager = manager;
 		this.identificador = identificador;
+		this.env = new Environment();
+		this.codec = new Codec( this.encoderFactory );
 		
-		// Ajusta os valores default
+		// Seta as variaveis internas
+		this.entityIdentifier = new EntityIdentifier( 3001, 101, 102 );
+		this.entityType = new EntityType();
+		this.spatialVariant = new SpatialVariant();
+		this.forceIdentifier = new ForceIdentifier( (byte)ForceID.NEUTRAL.value );
+		this.marking = new Marking( "TesteXplane" );
+		this.latitude = -23.0946534902203;
+		this.longitude = -45.108200517635815;
+		this.altitude = 1001.0;
+		this.isConcealed = (byte)0;
 		
-		this.entityType = new EntityTypeStruct( 
-				EntityKind.PLATFORM.value, 
-				EntityDomain.AIR.value, 
-				CountryType.BRAZIL.value,
-				PlatformAir.ATTACK_HELICOPTER.value, 
-				13, 
-				3, 
-				0);
-		
-		this.forceId = ForceID.NEUTRAL.value;
-		this.entityIdentifier = new EntityIdentifierStruct( 3001, 101, 102 );
-		this.isConcealed = 0;
-        this.marking = new MarkingStruct(1,"TesteXplane");
-        this.latitude = -23.0946534902203;
-        this.longitude = -45.108200517635815;
-        this.altitude = 7.0;
-        
-        // Envia ao RTI os valores default
         updateAllValues();
+        
         logger.info("Nova aeronave '"+ identificador + "' pronta em " + latitude + "," + longitude + " " + altitude);
 	}
 	
 	public void updateAllValues() throws Exception {
-		AttributeHandleValueMap attributes = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(6);
-
 		
-		// Encoda os atributos
-		EntityTypeStructEncoder entityTypeStructEncoder = new EntityTypeStructEncoder( this.entityType );
-        attributes.put( manager.getAttributeEntityType(), entityTypeStructEncoder.toByteArray());
-
-        ForceIdentifierEnumEncoder forceIdEnumEncoder = new ForceIdentifierEnumEncoder( forceId );
-        attributes.put( manager.getAttributeForceId(), forceIdEnumEncoder.toByteArray() );
-
-        EntityIdentifierStructEncoder entityIdentifierStructEncoder = new EntityIdentifierStructEncoder( entityIdentifier );      
-     	attributes.put( manager.getAttributeEntityId() , entityIdentifierStructEncoder.toByteArray() );
+		// Posicao
+		double[] geodetic = new double[3];
+		geodetic[ Environment.LAT ] = this.latitude;
+		geodetic[ Environment.LON ] = this.longitude;
+		geodetic[ Environment.ALT ] = this.altitude;		
 		
-        // IsConcealed
-        HLAoctet isConcealedOct = this.encoderFactory.createHLAoctet();           
-        isConcealedOct.setValue( (byte) isConcealed );
-        attributes.put( manager.getAttributeIsConcealed(), isConcealedOct.toByteArray() ); 
-     	
-
-        MarkingStructEncoder markingStructEncoder = new MarkingStructEncoder( marking );        
-        attributes.put( manager.getAttributeMarking(), markingStructEncoder.toByteArray() );
-
-        
-        double[] arrayPosition = CoordinateConversions.getXYZfromLatLonDegrees( latitude, longitude, altitude );
-        WorldLocationStruct worldLocation = new WorldLocationStruct( arrayPosition[0], arrayPosition[1], arrayPosition[2] );
-        VelocityVectorStruct velocityVectorStruct = new VelocityVectorStruct(0.5415523,-0.5452158,-1.1100446);
-        OrientationStruct orientationStruct = new OrientationStruct(-12.183228,-7.050103e+07,0.0);
-        SpatialFPStruct spatialFPStruct = new SpatialFPStruct(worldLocation,RPRboolean.False,velocityVectorStruct,orientationStruct);
-        SpatialFPStructEncoder spatialFPStructEncoder = new SpatialFPStructEncoder(spatialFPStruct);
-        attributes.put( manager.getAttributeSpatial() , spatialFPStructEncoder.toByteArray());       
-        
+		double[] geocentric = env.getGeocentricLocation(geodetic);
+		this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
+		this.spatialVariant.setOrientation(0.0f, 0.0f, 0.0f);
+		this.spatialVariant.setFrozen(false);
+		this.spatialVariant.setVelocityVector(10.0f, 0.0f, 0.0f);
+		this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
+		byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
 		
-		this.manager.getRtiAmb().updateAttributeValues( objectInstanceHandle, attributes, null); 		
+		// Force ID
+		byte[] encodedForceId = this.codec.encodeForceIdentifier( this.forceIdentifier );
+		
+		
+		// Concealed
+        byte[] encodedConcealed = this.codec.encodeIsConcealed( this.isConcealed );
+		
+		
+		// Cria o pacote de atributos
+		// *********  FALTA OS OUTROS ***********
+		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 6 );
+		ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
+		ahvm.put( manager.getIsConcealedHandle(), encodedConcealed );
+		ahvm.put( manager.getForceIdentifierHandle(), encodedForceId );
+		
+		
+		// ENVIA O UPDATE PARA A RTI
+		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
+		
 	}
 	
 	public void update( XPlaneDataPacket dataPacket ) {
@@ -142,17 +130,27 @@ public class XPlaneAircraft {
 		System.out.println( latitude +  ", " + longitude + " || " + altitude );
 		
 		try {
-			AttributeHandleValueMap attributes = this.manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 1 );
-	
-			double[] arrayPosition = CoordinateConversions.getXYZfromLatLonDegrees( this.latitude, this.longitude, this.altitude );
-	        WorldLocationStruct worldLocation = new WorldLocationStruct( arrayPosition[0], arrayPosition[1], arrayPosition[2] );
-	        VelocityVectorStruct velocityVectorStruct = new VelocityVectorStruct(0.5415523,-0.5452158,-1.1100446);
-	        OrientationStruct orientationStruct = new OrientationStruct(-12.183228,-7.050103e+07,0.0);
-	        SpatialFPStruct spatialFPStruct = new SpatialFPStruct(worldLocation,RPRboolean.False,velocityVectorStruct,orientationStruct);
-	        SpatialFPStructEncoder spatialFPStructEncoder = new SpatialFPStructEncoder(spatialFPStruct);
-	        attributes.put( this.manager.getAttributeSpatial(), spatialFPStructEncoder.toByteArray());       
-	        
-			this.manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, attributes, null);
+			
+			double[] geodetic = new double[3];
+			geodetic[ Environment.LAT ] = this.latitude;
+			geodetic[ Environment.LON ] = this.longitude;
+			geodetic[ Environment.ALT ] = this.altitude;		
+			
+			double[] geocentric = env.getGeocentricLocation(geodetic);
+			this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
+			this.spatialVariant.setOrientation(0.0f, 0.0f, 0.0f);
+			this.spatialVariant.setFrozen(false);
+			this.spatialVariant.setVelocityVector(10.0f, 0.0f, 0.0f);
+			this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
+			
+			byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
+			
+			// Cria o pacote de atributos
+			AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create(1);
+			ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
+			
+			// ENVIA O UPDATE PARA A RTI
+			manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
 			
 		} catch ( Exception e ) {
 			logger.error("Erro ao atualizar posicao: " + e.getMessage() );

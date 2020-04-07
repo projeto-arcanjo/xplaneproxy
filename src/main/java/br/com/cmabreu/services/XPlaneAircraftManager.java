@@ -28,6 +28,7 @@ public class XPlaneAircraftManager {
 	protected AttributeHandle markingHandle;	
 	protected AttributeHandle isConcealedHandle;
 	protected AttributeHandle entityIdentifierHandle;
+	protected AttributeHandle damageStateHandle;
 	
 	private List<XPlaneAircraft> aircrafts;
 	private static XPlaneAircraftManager instance;
@@ -58,6 +59,7 @@ public class XPlaneAircraftManager {
 		this.markingHandle = this.rtiAmb.getAttributeHandle(entityHandle, "Marking");
 		this.isConcealedHandle = this.rtiAmb.getAttributeHandle(entityHandle, "IsConcealed");
 		this.entityIdentifierHandle = this.rtiAmb.getAttributeHandle(entityHandle, "EntityIdentifier");
+		this.damageStateHandle = this.rtiAmb.getAttributeHandle(entityHandle, "DamageState");
 		
 		// package the information into a handle set
 		attributes = this.rtiAmb.getAttributeHandleSetFactory().create();
@@ -67,6 +69,7 @@ public class XPlaneAircraftManager {
 		attributes.add(markingHandle);
 		attributes.add(isConcealedHandle);
 		attributes.add(entityIdentifierHandle);
+		attributes.add(damageStateHandle);
         this.rtiAmb.publishObjectClassAttributes( this.entityHandle, attributes );   
         
         this.interactionHandle = this.rtiAmb.getInteractionClassHandle("Acknowledge");
@@ -83,81 +86,42 @@ public class XPlaneAircraftManager {
 		return entityIdentifierHandle;
 	}
 
-	public void setEntityIdentifierHandle(AttributeHandle entityIdentifierHandle) {
-		this.entityIdentifierHandle = entityIdentifierHandle;
-	}
-
-	public void setRtiAmb(RTIambassador rtiAmb) {
-		this.rtiAmb = rtiAmb;
-	}
-
 	public InteractionClassHandle getInteractionHandle() {
 		return interactionHandle;
 	}
 
-
-	public void setInteractionHandle(InteractionClassHandle interactionHandle) {
-		this.interactionHandle = interactionHandle;
-	}
-
-
 	public ObjectClassHandle getEntityHandle() {
 		return entityHandle;
-	}
-
-	public void setEntityHandle(ObjectClassHandle entityHandle) {
-		this.entityHandle = entityHandle;
 	}
 
 	public AttributeHandle getEntityTypeHandle() {
 		return entityTypeHandle;
 	}
 
-	public void setEntityTypeHandle(AttributeHandle entityTypeHandle) {
-		this.entityTypeHandle = entityTypeHandle;
-	}
-
 	public AttributeHandle getSpatialHandle() {
 		return spatialHandle;
-	}
-
-	public void setSpatialHandle(AttributeHandle spatialHandle) {
-		this.spatialHandle = spatialHandle;
 	}
 
 	public AttributeHandle getForceIdentifierHandle() {
 		return forceIdentifierHandle;
 	}
 
-	public void setForceIdentifierHandle(AttributeHandle forceIdentifierHandle) {
-		this.forceIdentifierHandle = forceIdentifierHandle;
-	}
-
 	public AttributeHandle getMarkingHandle() {
 		return markingHandle;
-	}
-
-	public void setMarkingHandle(AttributeHandle markingHandle) {
-		this.markingHandle = markingHandle;
 	}
 
 	public List<XPlaneAircraft> getAircrafts() {
 		return aircrafts;
 	}
 
-	public void setAircrafts(List<XPlaneAircraft> aircrafts) {
-		this.aircrafts = aircrafts;
-	}
-
 	public AttributeHandle getIsConcealedHandle() {
 		return isConcealedHandle;
 	}
 
-	public void setIsConcealedHandle(AttributeHandle isConcealedHandle) {
-		this.isConcealedHandle = isConcealedHandle;
+	public AttributeHandle getDamageStateHandle() {
+		return damageStateHandle;
 	}
 
-	
 	public XPlaneAircraft spawn( String identificador ) throws Exception {
 		XPlaneAircraft temp = new XPlaneAircraft( this, identificador );
 		this.aircrafts.add( temp );

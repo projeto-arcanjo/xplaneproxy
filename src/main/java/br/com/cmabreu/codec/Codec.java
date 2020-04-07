@@ -858,6 +858,18 @@ public class Codec {
         return isConcealed.toByteArray();
 	}
 
+	public byte[] encodeDamageState( byte damageVal ) throws DecoderException{
+		HLAoctet damageState = encoderFactory.createHLAoctet();
+        damageState.setValue( damageVal );
+        return damageState.toByteArray();
+	}
+
+	public byte decodeDamageState( byte[] bytes ) throws DecoderException {
+		HLAoctet damageState = encoderFactory.createHLAoctet();
+		damageState.decode( bytes );
+		return damageState.getValue();
+	}
+
 	public byte decodeIsConcealed( byte[] bytes ) throws DecoderException {
 		HLAoctet isConcealed = encoderFactory.createHLAoctet();
 		isConcealed.decode( bytes );

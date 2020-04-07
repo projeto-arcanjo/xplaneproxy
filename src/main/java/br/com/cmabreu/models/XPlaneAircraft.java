@@ -40,6 +40,7 @@ public class XPlaneAircraft implements Serializable {
 	private EntityIdentifier entityIdentifier;
 	private Marking marking;
 	private byte isConcealed;
+	private byte damageState;
 	
 	private double latitude;
 	private double longitude;
@@ -51,6 +52,11 @@ public class XPlaneAircraft implements Serializable {
 	public boolean isMe( String identificador ) {
 		return identificador.equals( this.identificador );
 	}
+	
+	
+	/*
+					NETN-FOM.pdf 
+	*/
 	
 	public XPlaneAircraft( XPlaneAircraftManager manager, String identificador ) throws Exception {
 		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getEntityHandle() );
@@ -80,6 +86,10 @@ public class XPlaneAircraft implements Serializable {
 		this.longitude = -45.108200517635815;
 		this.altitude = 1001.0;
 		this.isConcealed = (byte)0;
+		
+		// Pagina 53
+		this.damageState = 
+		
 		
         updateAllValues();
         

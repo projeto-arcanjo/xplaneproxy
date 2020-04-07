@@ -7,7 +7,7 @@ import edu.nps.moves.siso.EnumNotFoundException;
 // RPR ENUMERATIONS XML FOM :: DamageStatusEnum32
 
 public enum DamageState {
-    NODAMAGE(0, "No Damage"),
+    NO_DAMAGE(0, "No Damage"),
     SLIGHT_DAMAGE(1, "Slight Damage"),
     MODERATE_DAMAGE(2, "Moderate Damage"),
     DESTROYED(3, "Destroyed");

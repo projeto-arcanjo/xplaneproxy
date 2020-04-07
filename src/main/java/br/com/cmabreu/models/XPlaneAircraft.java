@@ -17,6 +17,7 @@ import br.com.cmabreu.services.XPlaneAircraftManager;
 import br.com.cmabreu.udp.XPlaneData;
 import br.com.cmabreu.udp.XPlaneDataPacket;
 import edu.nps.moves.disenum.CountryType;
+import edu.nps.moves.disenum.DamageState;
 import edu.nps.moves.disenum.EntityDomain;
 import edu.nps.moves.disenum.EntityKind;
 import edu.nps.moves.disenum.ForceID;
@@ -70,10 +71,10 @@ public class XPlaneAircraft implements Serializable {
 		this.entityIdentifier = new EntityIdentifier( 3001, 101, 102 );
 		
 		this.entityType = new EntityType(  
-				(byte) EntityKind.PLATFORM.value,
-				(byte) EntityDomain.AIR.value,
-				(byte) CountryType.BRAZIL.value,
-				(byte) PlatformAir.ATTACK_HELICOPTER.value,
+				(byte) EntityKind.PLATFORM.getValue(),
+				(byte) EntityDomain.AIR.getValue(),
+				(byte) CountryType.BRAZIL.getValue(),
+				(byte) PlatformAir.ATTACK_HELICOPTER.getValue(),
 				(byte) 13, 
 				(byte) 3, 
 				(byte) 0 
@@ -88,7 +89,7 @@ public class XPlaneAircraft implements Serializable {
 		this.isConcealed = (byte)0;
 		
 		// Pagina 53
-		this.damageState = 
+		this.damageState = (byte)DamageState.NO_DAMAGE.getValue();
 		
 		
         updateAllValues();
@@ -129,6 +130,9 @@ public class XPlaneAircraft implements Serializable {
 		// Entity Type
 		byte[] encodedEntityType = this.codec.encodeEntityType( this.entityType );
 		
+		// Damage State
+		byte[] encodedDamageState = this.codec.encodeDamageState( this.damageState );
+		
 		// Cria o pacote de atributos
 		// *********  FALTA OS OUTROS ***********
 		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 6 );
@@ -138,6 +142,7 @@ public class XPlaneAircraft implements Serializable {
 		ahvm.put( manager.getMarkingHandle(), encodedMarking );
 		ahvm.put( manager.getEntityIdentifierHandle(), encodedEntityIdentifier );
 		ahvm.put( manager.getEntityTypeHandle(), encodedEntityType );
+		ahvm.put( manager.getDamageStateHandle(), encodedDamageState );
 		
 		// ENVIA O UPDATE PARA A RTI
 		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );

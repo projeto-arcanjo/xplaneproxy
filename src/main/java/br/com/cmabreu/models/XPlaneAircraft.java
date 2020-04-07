@@ -1,5 +1,7 @@
 package br.com.cmabreu.models;
 
+import java.io.Serializable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,7 @@ import br.com.cmabreu.codec.EntityType;
 import br.com.cmabreu.codec.ForceIdentifier;
 import br.com.cmabreu.codec.Marking;
 import br.com.cmabreu.codec.SpatialVariant;
+import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.misc.Environment;
 import br.com.cmabreu.services.XPlaneAircraftManager;
 import br.com.cmabreu.udp.XPlaneData;
@@ -23,7 +26,8 @@ import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RtiFactoryFactory;
 import hla.rti1516e.encoding.EncoderFactory;
 
-public class XPlaneAircraft {
+public class XPlaneAircraft implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private ObjectInstanceHandle objectInstanceHandle;
 	private XPlaneAircraftManager manager;
 	private EncoderFactory encoderFactory;
@@ -79,7 +83,9 @@ public class XPlaneAircraft {
 		
         updateAllValues();
         
-        logger.info("Nova aeronave '"+ identificador + "' pronta em " + latitude + "," + longitude + " " + altitude);
+        int handle = new EncoderDecoder().getObjectHandle(this.objectInstanceHandle  );
+        
+        logger.info("Nova aeronave '"+ identificador + "' [" + handle + "] pronta em " + latitude + "," + longitude + " " + altitude);
 	}
 	
 	public void updateAllValues() throws Exception {
@@ -122,7 +128,6 @@ public class XPlaneAircraft {
 		ahvm.put( manager.getMarkingHandle(), encodedMarking );
 		ahvm.put( manager.getEntityIdentifierHandle(), encodedEntityIdentifier );
 		ahvm.put( manager.getEntityTypeHandle(), encodedEntityType );
-		
 		
 		// ENVIA O UPDATE PARA A RTI
 		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );

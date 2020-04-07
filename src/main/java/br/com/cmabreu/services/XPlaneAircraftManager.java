@@ -66,6 +66,7 @@ public class XPlaneAircraftManager {
 		attributes.add(forceIdentifierHandle);
 		attributes.add(markingHandle);
 		attributes.add(isConcealedHandle);
+		attributes.add(entityIdentifierHandle);
         this.rtiAmb.publishObjectClassAttributes( this.entityHandle, attributes );   
         
         this.interactionHandle = this.rtiAmb.getInteractionClassHandle("Acknowledge");
@@ -156,6 +157,13 @@ public class XPlaneAircraftManager {
 		this.isConcealedHandle = isConcealedHandle;
 	}
 
+	
+	public XPlaneAircraft spawn( String identificador ) throws Exception {
+		XPlaneAircraft temp = new XPlaneAircraft( this, identificador );
+		this.aircrafts.add( temp );
+		return temp;
+	}
+	
 	public void update( XPlaneDataPacket dataPacket ) throws Exception {
 		// Identifica o dado pelo nome do computador que enviou
 		String identificador = dataPacket.getHostName() ;
@@ -173,8 +181,7 @@ public class XPlaneAircraftManager {
 		
 		// Se eu cheguei aqui eh porque nao tenho essa aeronave ainda.
 		// Preciso criar uma nova.
-		XPlaneAircraft temp = new XPlaneAircraft( this, identificador );
-		this.aircrafts.add( temp );
+		XPlaneAircraft temp = this.spawn(identificador);
 		
 		// E ja atualizo suas informacoes!
 		temp.update(dataPacket);

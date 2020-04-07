@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import br.com.cmabreu.FederateAmbassador;
 import br.com.cmabreu.FederateExecutorThread;
 import br.com.cmabreu.misc.EncoderDecoder;
+import br.com.cmabreu.models.XPlaneAircraft;
 import br.com.cmabreu.udp.UDPServerThread;
 import hla.rti1516e.CallbackModel;
 import hla.rti1516e.RTIambassador;
@@ -24,7 +25,6 @@ import hla.rti1516e.exceptions.FederatesCurrentlyJoined;
 import hla.rti1516e.exceptions.FederationExecutionAlreadyExists;
 import hla.rti1516e.exceptions.FederationExecutionDoesNotExist;
 import hla.rti1516e.exceptions.NotConnected;
-import hla.rti1516e.exceptions.RTIexception;
 import hla.rti1516e.exceptions.RTIinternalError;
 
 @Service
@@ -226,10 +226,6 @@ public class FederateService {
 		return encoder;
 	}
 	
-	public void sendInteraction() throws RTIexception	{
-		// rtiamb.sendInteraction( servedHandle, parameters, generateTag(), time );
-	}	
-
 	private byte[] generateTag() {
 		return ( "XPLANE_" + System.currentTimeMillis()).getBytes();
 	}	
@@ -237,6 +233,12 @@ public class FederateService {
 	public void publish() throws Exception {
 		// Quem vai publicar uma aeronave eh o software X-Plane quando enviar dados.
 		// Até la, nada de aviao por aqui.
+	}
+
+	public XPlaneAircraft spawn( String identificador ) throws Exception {
+		XPlaneAircraft aircraft = XPlaneAircraftManager.getInstance().spawn( identificador );
+		return aircraft;
+		
 	}
 	
 	

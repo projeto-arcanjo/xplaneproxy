@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.cmabreu.models.XPlaneAircraft;
 import br.com.cmabreu.services.FederateService;
 
 @RestController
@@ -34,6 +35,18 @@ public class FederateController {
 			//
 		}
 		return "ok";
+	}
+	
+	
+	@RequestMapping(value = "/spawn", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
+	public @ResponseBody XPlaneAircraft spawn( @RequestParam(value = "identificador", required = true) String identificador ) {
+		try {
+			XPlaneAircraft aircraft = federateService.spawn( identificador );
+			return aircraft;
+		} catch ( Exception e ) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	

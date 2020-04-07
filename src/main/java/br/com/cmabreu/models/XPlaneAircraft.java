@@ -154,8 +154,98 @@ public class XPlaneAircraft implements Serializable {
 		// Longitude
 		this.longitude = data.getValues().get(1).getValue();
 		// Altitude
-		this.altitude = data.getValues().get(3).getValue();
+		this.altitude = data.getValues().get(2).getValue();
+
+		update( latitude, longitude, altitude );
 		
+	}
+	
+	/*
+	 * 		GETTERS E SETTERS
+	 */
+		
+
+	public EntityType getEntityType() {
+		return entityType;
+	}
+
+	public void setEntityType(EntityType entityType) {
+		this.entityType = entityType;
+	}
+
+	public SpatialVariant getSpatialVariant() {
+		return spatialVariant;
+	}
+
+	public void setSpatialVariant(SpatialVariant spatialVariant) {
+		this.spatialVariant = spatialVariant;
+	}
+
+	public ForceIdentifier getForceIdentifier() {
+		return forceIdentifier;
+	}
+
+	public void setForceIdentifier(ForceIdentifier forceIdentifier) {
+		this.forceIdentifier = forceIdentifier;
+	}
+
+	public EntityIdentifier getEntityIdentifier() {
+		return entityIdentifier;
+	}
+
+	public void setEntityIdentifier(EntityIdentifier entityIdentifier) {
+		this.entityIdentifier = entityIdentifier;
+	}
+
+	public Marking getMarking() {
+		return marking;
+	}
+
+	public void setMarking(Marking marking) {
+		this.marking = marking;
+	}
+
+	public byte getIsConcealed() {
+		return isConcealed;
+	}
+
+	public void setIsConcealed(byte isConcealed) {
+		this.isConcealed = isConcealed;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public double getAltitude() {
+		return altitude;
+	}
+
+	public void setAltitude(double altitude) {
+		this.altitude = altitude;
+	}
+
+	public String getIdentificador() {
+		return identificador;
+	}
+
+	public void setIdentificador(String identificador) {
+		this.identificador = identificador;
+	}
+
+	public void update(double lat, double lon, double alt) {
 		System.out.println( latitude +  ", " + longitude + " || " + altitude );
 		
 		try {
@@ -184,8 +274,8 @@ public class XPlaneAircraft implements Serializable {
 		} catch ( Exception e ) {
 			logger.error("Erro ao atualizar posicao: " + e.getMessage() );
 		}
+		
 	}
-	
 	
 	
 }

@@ -187,6 +187,18 @@ public class XPlaneAircraftManager {
 		temp.update(dataPacket);
 		
 	}
+
+	public XPlaneAircraft update(String identificador, double lat, double lon, double alt) {
+		// Esse update vem do frontend pelo Controller
+		// Foi criado para efeito de testes
+		for( XPlaneAircraft ac : aircrafts  ) {
+			if( ac.getIdentificador().equals( identificador ) ) {
+				ac.update( lat, lon, alt );
+				return ac;
+			}
+		}
+		return null;
+	}
 	
 	
 }

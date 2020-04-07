@@ -240,6 +240,10 @@ public class FederateService {
 		return aircraft;
 		
 	}
+
+	public XPlaneAircraft update( String identificador, long lat, long lon, long alt ) {
+		return XPlaneAircraftManager.getInstance().update( identificador, lat, lon, alt);
+	}
 	
 	
 }

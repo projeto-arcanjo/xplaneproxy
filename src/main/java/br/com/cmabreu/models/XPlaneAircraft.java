@@ -79,6 +79,15 @@ public class XPlaneAircraft implements Serializable {
 		// Seta as variaveis internas
 		this.entityIdentifier = new EntityIdentifier( 3001, 101, 102 );
 		
+		/*
+		 * 		Consultar o SISO-010-2019
+		 * 		Item 5.13.15 (pág 113)
+		 * 
+		 * 		e https://github.com/open-dis/DISTutorial/wiki/Entity-Types
+		 *  
+		 */
+		
+		
 		this.entityType = new EntityType(  
 				(byte) EntityKind.PLATFORM.getValue(),
 				(byte) EntityDomain.AIR.getValue(),

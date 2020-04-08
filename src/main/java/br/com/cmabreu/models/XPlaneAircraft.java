@@ -43,6 +43,15 @@ public class XPlaneAircraft implements Serializable {
 	private byte isConcealed;
 	private byte damageState;
 	
+	private float velocityX;
+	private float velocityY;
+	private float velocityZ;
+	
+	private float orientationPsi;
+	private float orientationTheta;
+	private float orientationPhi;
+	
+	
 	private double latitude;
 	private double longitude;
 	private double altitude;
@@ -87,6 +96,12 @@ public class XPlaneAircraft implements Serializable {
 		this.longitude = -45.108200517635815;
 		this.altitude = 1001.0;
 		this.isConcealed = (byte)0;
+		this.velocityX = (float) 0.5415523;
+		this.velocityX = (float) -0.5452158;
+		this.velocityX = (float) -1.1100446;
+		this.orientationPhi = (float)-12.183228;
+		this.orientationTheta = (float)-7.050103;
+		this.orientationPsi = (float)0.0;
 		
 		// Pagina 53
 		this.damageState = (byte)DamageState.NO_DAMAGE.getValue();
@@ -109,9 +124,9 @@ public class XPlaneAircraft implements Serializable {
 		
 		double[] geocentric = env.getGeocentricLocation(geodetic);
 		this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
-		this.spatialVariant.setOrientation(0.0f, 0.0f, 0.0f);
+		this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
 		this.spatialVariant.setFrozen(false);
-		this.spatialVariant.setVelocityVector(10.0f, 0.0f, 0.0f);
+		this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
 		this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
 		byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
 		
@@ -163,16 +178,7 @@ public class XPlaneAircraft implements Serializable {
 	
 	// Envia posicao vinda do X-Plane para a RTI
 	private void updateLatLongAlt( XPlaneData data ) {
-		
-		// Latitude
-		this.latitude = data.getValues().get(0).getValue();
-		// Longitude
-		this.longitude = data.getValues().get(1).getValue();
-		// Altitude
-		this.altitude = data.getValues().get(2).getValue();
-
-		update( latitude, longitude, altitude );
-		
+		update( data.getValues().get(0).getValue(), data.getValues().get(1).getValue(), data.getValues().get(2).getValue() );
 	}
 	
 	/*
@@ -262,6 +268,14 @@ public class XPlaneAircraft implements Serializable {
 
 	public void update(double lat, double lon, double alt) {
 		System.out.println( latitude +  ", " + longitude + " || " + altitude );
+
+		// Atualiza os atributos do objeto
+		// Latitude
+		this.latitude = lat;
+		// Longitude
+		this.longitude = lon;
+		// Altitude
+		this.altitude = alt;
 		
 		try {
 			
@@ -272,11 +286,10 @@ public class XPlaneAircraft implements Serializable {
 			
 			double[] geocentric = env.getGeocentricLocation(geodetic);
 			this.spatialVariant.setWorldLocation(geocentric[ SpatialVariant.X ], geocentric[ SpatialVariant.Y ], geocentric[ SpatialVariant.Z ]);
-			this.spatialVariant.setOrientation(0.0f, 0.0f, 0.0f);
+			this.spatialVariant.setOrientation( this.orientationPsi, this.orientationTheta, this.orientationPhi );
 			this.spatialVariant.setFrozen(false);
-			this.spatialVariant.setVelocityVector(10.0f, 0.0f, 0.0f);
+			this.spatialVariant.setVelocityVector( this.velocityX, this.velocityY, this.velocityZ );
 			this.spatialVariant.setDiscriminator(SpatialVariant.DRM_FPW);		
-			
 			byte[] encodedSpatialVariant = this.codec.encodeSpatialVariant( this.spatialVariant );
 			
 			// Cria o pacote de atributos

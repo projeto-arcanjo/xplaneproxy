@@ -152,7 +152,7 @@ public class XPlaneAircraftManager {
 		
 	}
 
-	public XPlaneAircraft update(String identificador, double lat, double lon, double alt) {
+	public XPlaneAircraft update(String identificador, float lat, float lon, float alt) {
 		// Esse update vem do frontend pelo Controller
 		// Foi criado para efeito de testes
 		for( XPlaneAircraft ac : aircrafts  ) {

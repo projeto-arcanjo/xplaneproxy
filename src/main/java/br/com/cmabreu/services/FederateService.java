@@ -241,7 +241,7 @@ public class FederateService {
 		
 	}
 
-	public XPlaneAircraft update( String identificador, long lat, long lon, long alt ) {
+	public XPlaneAircraft update( String identificador, float lat, float lon, float alt ) {
 		return XPlaneAircraftManager.getInstance().update( identificador, lat, lon, alt);
 	}
 	

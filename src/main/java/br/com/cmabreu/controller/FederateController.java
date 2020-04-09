@@ -52,8 +52,8 @@ public class FederateController {
 
 	@RequestMapping(value = "/update", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
 	public @ResponseBody XPlaneAircraft update( @RequestParam(value = "identificador", required = true) String identificador,
-			@RequestParam(value = "lat", required = true) long lat,
-			@RequestParam(value = "lon", required = true) long lon, @RequestParam(value = "alt", required = true) long alt ) {
+			@RequestParam(value = "lat", required = true) float lat,
+			@RequestParam(value = "lon", required = true) float lon, @RequestParam(value = "alt", required = true) float alt ) {
 		try {
 			XPlaneAircraft aircraft = federateService.update( identificador, lat, lon, alt );
 			return aircraft;

@@ -52,9 +52,9 @@ public class XPlaneAircraft implements Serializable {
 	private float orientationPhi;
 	
 	
-	private double latitude;
-	private double longitude;
-	private double altitude;
+	private float latitude;
+	private float longitude;
+	private float altitude;
 	private String identificador;
 	private Logger logger = LoggerFactory.getLogger( XPlaneAircraft.class );
 	
@@ -100,10 +100,10 @@ public class XPlaneAircraft implements Serializable {
 		
 		this.spatialVariant = new SpatialVariant();
 		this.forceIdentifier = new ForceIdentifier( (byte)ForceID.NEUTRAL.value );
-		this.marking = new Marking( "TesteXplane" );
-		this.latitude = -23.0946534902203;
-		this.longitude = -45.108200517635815;
-		this.altitude = 1001.0;
+		this.marking = new Marking( this.identificador );
+		this.latitude = (float)-23.0946534902203;
+		this.longitude = (float)-45.108200517635815;
+		this.altitude = (float)1001.0;
 		this.isConcealed = (byte)0;
 		this.velocityX = (float) 0.5415523;
 		this.velocityX = (float) -0.5452158;
@@ -158,7 +158,7 @@ public class XPlaneAircraft implements Serializable {
 		byte[] encodedDamageState = this.codec.encodeDamageState( this.damageState );
 		
 		// Cria o pacote de atributos
-		// *********  FALTA OS OUTROS ***********
+		
 		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 6 );
 		ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
 		ahvm.put( manager.getIsConcealedHandle(), encodedConcealed );
@@ -247,7 +247,7 @@ public class XPlaneAircraft implements Serializable {
 		return latitude;
 	}
 
-	public void setLatitude(double latitude) {
+	public void setLatitude(float latitude) {
 		this.latitude = latitude;
 	}
 
@@ -255,7 +255,7 @@ public class XPlaneAircraft implements Serializable {
 		return longitude;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(float longitude) {
 		this.longitude = longitude;
 	}
 
@@ -263,7 +263,7 @@ public class XPlaneAircraft implements Serializable {
 		return altitude;
 	}
 
-	public void setAltitude(double altitude) {
+	public void setAltitude(float altitude) {
 		this.altitude = altitude;
 	}
 
@@ -275,7 +275,7 @@ public class XPlaneAircraft implements Serializable {
 		this.identificador = identificador;
 	}
 
-	public void update(double lat, double lon, double alt) {
+	public void update(float lat, float lon, float alt) {
 		System.out.println( latitude +  ", " + longitude + " || " + altitude );
 
 		// Atualiza os atributos do objeto

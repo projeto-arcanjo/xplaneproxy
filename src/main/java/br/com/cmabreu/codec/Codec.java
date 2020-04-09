@@ -835,7 +835,7 @@ public class Codec {
 		return EntityIdentifierStruct.toByteArray();
 	}
 	
-	public EntityIdentifier decoderEntityIdentifier( byte[] bytes ) throws DecoderException {
+	public EntityIdentifier decodeEntityIdentifier( byte[] bytes ) throws DecoderException {
 		HLAfixedRecord EntityIdentifierStruct = createEntityIdentifierDecoder();
 		EntityIdentifierStruct.decode( bytes );
 		HLAinteger16BE sideId = (HLAinteger16BE)EntityIdentifierStruct.get(0);

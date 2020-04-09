@@ -106,10 +106,10 @@ public class XPlaneAircraft implements Serializable {
 		this.altitude = (float)1001.0;
 		this.isConcealed = (byte)0;
 		this.velocityX = (float) 0.5415523;
-		this.velocityX = (float) -0.5452158;
-		this.velocityX = (float) -1.1100446;
-		this.orientationPhi = (float)-12.183228;
-		this.orientationTheta = (float)-7.050103;
+		this.velocityY = (float) -0.5452158;
+		this.velocityZ = (float) -1.1100446;
+		this.orientationPhi = (float)0.0;
+		this.orientationTheta = (float)0.0;
 		this.orientationPsi = (float)0.0;
 		
 		// Pagina 53
@@ -159,7 +159,7 @@ public class XPlaneAircraft implements Serializable {
 		
 		// Cria o pacote de atributos
 		
-		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 6 );
+		AttributeHandleValueMap ahvm = manager.getRtiAmb().getAttributeHandleValueMapFactory().create( 7 );
 		ahvm.put( manager.getSpatialHandle(), encodedSpatialVariant);		
 		ahvm.put( manager.getIsConcealedHandle(), encodedConcealed );
 		ahvm.put( manager.getForceIdentifierHandle(), encodedForceId );
@@ -173,21 +173,46 @@ public class XPlaneAircraft implements Serializable {
 		
 	}
 	
-	public void update( XPlaneDataPacket dataPacket ) {
+	public void update( XPlaneDataPacket dataPacket ) throws Exception{
 		for( XPlaneData data : dataPacket.getData() ) {
+
+			// 17 : Pitch, Roll, Heading
+			if( data.getIndex() == 17 ) {
+				updatePitchRollReading( data );
+			}
 			
 			// 20 : LatLongAlt
 			if( data.getIndex() == 20 ) {
 				updateLatLongAlt( data );
 			}
 			
-		}		            
+		}
+		
+		// Depois de atualizar todos os atributos eu 
+		// disparo a posicao para a RTI de uma vez so
+		sendSpatialVariant();
 	}
 
+	// Envia situacao de posicionamento do X-Plane para a RTI
+	private void updatePitchRollReading( XPlaneData data ) {
+		float pitch = data.getValues().get(0).getValue(); 
+		float roll = data.getValues().get(1).getValue();
+		float hTrue = data.getValues().get(2).getValue();
+		// vou descartar o rumo magnetico porque o Cesium trabalha com o verdadeiro.
+		// float hMagn = data.getValues().get(3).getValue();
+		
+		// https://mathworld.wolfram.com/EulerAngles.html
+		// theta is pitch, psi is roll, and phi is yaw/heading.
+		this.orientationPsi = roll;
+		this.orientationTheta = pitch;		
+		this.orientationPhi = hTrue;
+	}
 	
 	// Envia posicao vinda do X-Plane para a RTI
 	private void updateLatLongAlt( XPlaneData data ) {
-		update( data.getValues().get(0).getValue(), data.getValues().get(1).getValue(), data.getValues().get(2).getValue() );
+		this.latitude = data.getValues().get(0).getValue();
+		this.longitude = data.getValues().get(1).getValue();
+		this.altitude = data.getValues().get(2).getValue();		
 	}
 	
 	/*
@@ -275,18 +300,15 @@ public class XPlaneAircraft implements Serializable {
 		this.identificador = identificador;
 	}
 
-	public void update(float lat, float lon, float alt) {
-		System.out.println( latitude +  ", " + longitude + " || " + altitude );
+	public byte getDamageState() {
+		return damageState;
+	}
+	
+	public void setDamageState(byte damageState) {
+		this.damageState = damageState;
+	}
 
-		// Atualiza os atributos do objeto
-		// Latitude
-		this.latitude = lat;
-		// Longitude
-		this.longitude = lon;
-		// Altitude
-		this.altitude = alt;
-		
-		try {
+	public void sendSpatialVariant() throws Exception {
 			
 			double[] geodetic = new double[3];
 			geodetic[ Environment.LAT ] = this.latitude;
@@ -307,12 +329,19 @@ public class XPlaneAircraft implements Serializable {
 			
 			// ENVIA O UPDATE PARA A RTI
 			manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
-			
-		} catch ( Exception e ) {
-			logger.error("Erro ao atualizar posicao: " + e.getMessage() );
-		}
-		
+	}
+
+
+	// So para cumprir o metodo que vem do controller para testes
+	// Simula um pacote UDP de posicao (codigo 20) do X-Plane
+	public void updateTest(float lat, float lon, float alt, float head, float pitch, float roll) {
+		this.latitude = lat;
+		this.longitude = lon;
+		this.altitude = alt;
+		this.orientationPsi = roll;
+		this.orientationTheta = pitch;		
+		this.orientationPhi = head;		
 	}
 	
-	
+		
 }

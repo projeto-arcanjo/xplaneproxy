@@ -456,8 +456,8 @@ public class Codec {
 		float[] orientation = sv.getOrientation();
 		HLAfixedRecord OrientationStruct = (HLAfixedRecord) SpatialStaticStruct.get(2);
 		((HLAfloat32BE) OrientationStruct.get(0)).setValue(orientation[SpatialVariant.PSI]);
-		((HLAfloat32BE) OrientationStruct.get(0)).setValue(orientation[SpatialVariant.THETA]);
-		((HLAfloat32BE) OrientationStruct.get(0)).setValue(orientation[SpatialVariant.PHI]);
+		((HLAfloat32BE) OrientationStruct.get(1)).setValue(orientation[SpatialVariant.THETA]);
+		((HLAfloat32BE) OrientationStruct.get(2)).setValue(orientation[SpatialVariant.PHI]);
 
 		if (sv.getDiscriminator() == SpatialVariant.STATIC) { // DRM#1
 			return SpatialFixedStruct.toByteArray();

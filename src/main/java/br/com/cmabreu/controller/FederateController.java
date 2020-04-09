@@ -53,9 +53,13 @@ public class FederateController {
 	@RequestMapping(value = "/update", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
 	public @ResponseBody XPlaneAircraft update( @RequestParam(value = "identificador", required = true) String identificador,
 			@RequestParam(value = "lat", required = true) float lat,
-			@RequestParam(value = "lon", required = true) float lon, @RequestParam(value = "alt", required = true) float alt ) {
+			@RequestParam(value = "lon", required = true) float lon, 
+			@RequestParam(value = "alt", required = true) float alt,
+			@RequestParam(value = "head", required = true) float head, 
+			@RequestParam(value = "pitch", required = true) float pitch,
+			@RequestParam(value = "roll", required = true) float roll) {
 		try {
-			XPlaneAircraft aircraft = federateService.update( identificador, lat, lon, alt );
+			XPlaneAircraft aircraft = federateService.update( identificador, lat, lon, alt, head, pitch, roll );
 			return aircraft;
 		} catch ( Exception e ) {
 			e.printStackTrace();

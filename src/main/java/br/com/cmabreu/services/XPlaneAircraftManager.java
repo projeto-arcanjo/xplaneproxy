@@ -152,12 +152,17 @@ public class XPlaneAircraftManager {
 		
 	}
 
-	public XPlaneAircraft update(String identificador, float lat, float lon, float alt) {
+	public XPlaneAircraft updateTest(String identificador, float lat, float lon, float alt, float head, float pitch, float roll) {
 		// Esse update vem do frontend pelo Controller
 		// Foi criado para efeito de testes
 		for( XPlaneAircraft ac : aircrafts  ) {
 			if( ac.getIdentificador().equals( identificador ) ) {
-				ac.update( lat, lon, alt );
+				try {
+					ac.updateTest( lat, lon, alt, head, pitch, roll );
+					ac.sendSpatialVariant();
+				} catch(Exception e ) {
+					e.printStackTrace();
+				}
 				return ac;
 			}
 		}

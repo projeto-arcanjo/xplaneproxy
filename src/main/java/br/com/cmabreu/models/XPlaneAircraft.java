@@ -101,20 +101,17 @@ public class XPlaneAircraft implements Serializable {
 		this.spatialVariant = new SpatialVariant();
 		this.forceIdentifier = new ForceIdentifier( (byte)ForceID.NEUTRAL.value );
 		this.marking = new Marking( this.identificador );
-		this.latitude = (float)-23.0946534902203;
-		this.longitude = (float)-45.108200517635815;
-		this.altitude = (float)1001.0;
+		this.latitude = (float)-23.0;
+		this.longitude = (float)-45.0;
+		this.altitude = (float)0.0;
 		this.isConcealed = (byte)0;
-		this.velocityX = (float) 0.5415523;
-		this.velocityY = (float) -0.5452158;
-		this.velocityZ = (float) -1.1100446;
+		this.velocityX = (float) 0.0;
+		this.velocityY = (float) 0.0;
+		this.velocityZ = (float) 0.0;
 		this.orientationPhi = (float)0.0;
 		this.orientationTheta = (float)0.0;
 		this.orientationPsi = (float)0.0;
-		
-		// Pagina 53
 		this.damageState = (byte)DamageState.NO_DAMAGE.getValue();
-		
 		
         updateAllValues();
         

@@ -8,7 +8,6 @@ public class UDPClient {
     private DatagramSocket socket;
     private InetAddress address;
     private int port;
-    private byte[] buf;
     
     public UDPClient( String host, int port ) throws Exception {
     	this.port = port;
@@ -20,10 +19,11 @@ public class UDPClient {
     	this.socket.close();
     }    
     
-    public void sendEcho( String msg ) throws Exception {
-        buf = msg.getBytes();
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, this.port);
+    public void sendData( byte[] buf ) throws Exception {
+        System.out.println("Enviando " + buf.length + " bytes...");
+    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, this.port);
         socket.send(packet);
+        socket.close();
         //packet = new DatagramPacket(buf, buf.length);
         //socket.receive(packet);
         //String received = new String( packet.getData(), 0, packet.getLength() );

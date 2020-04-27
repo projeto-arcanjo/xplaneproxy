@@ -20,14 +20,10 @@ public class UDPClient {
     }    
     
     public void sendData( byte[] buf ) throws Exception {
-        System.out.println("Enviando " + buf.length + " bytes...");
+        System.out.println("Sending " + buf.length + " bytes...");
     	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, this.port);
         socket.send(packet);
         socket.close();
-        //packet = new DatagramPacket(buf, buf.length);
-        //socket.receive(packet);
-        //String received = new String( packet.getData(), 0, packet.getLength() );
-        //return received;
     }    
     
 }

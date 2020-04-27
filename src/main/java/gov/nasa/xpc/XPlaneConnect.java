@@ -25,16 +25,20 @@
 
 package gov.nasa.xpc;
 
-import gov.nasa.xpc.discovery.Beacon;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.AutoCloseable;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import gov.nasa.xpc.discovery.Beacon;
 
 /**
  * Represents a client that can connect to and interact with the X-Plane Connect plugin.
@@ -937,6 +941,38 @@ public class XPlaneConnect implements AutoCloseable
 	    sendUDP(os.toByteArray());
 	}
 
+	
+	public void sendOBJL( long index, double[] latLonEle, float[] psiThePhi, long ground, float smoke ) throws IOException { 
+	    //Convert data to bytes
+		ByteBuffer bb = ByteBuffer.allocate( 56 ); 
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.putLong( index );
+
+		double lat = latLonEle[0];		// -22.80103;
+		double lon = latLonEle[1];		// -43.22729;
+		double ele = latLonEle[2];		// 5.0;
+		
+		float psi = psiThePhi[0];		
+		float the = psiThePhi[1];
+		float phi = psiThePhi[2];
+		
+		bb.putDouble( lat );
+		bb.putDouble( lon );
+		bb.putDouble( ele );
+		bb.putFloat( psi );
+		bb.putFloat( the );
+		bb.putFloat( phi );
+		bb.putLong( ground );
+		bb.putFloat( smoke );	
+		
+	    //Build and send message
+	    ByteArrayOutputStream os = new ByteArrayOutputStream();
+	    os.write( "OBJL".getBytes(StandardCharsets.UTF_8) );
+	    os.write( 0xFF ); //Placeholder for message length
+	    os.write(bb.array());
+	    sendUDP(os.toByteArray());
+	    
+	}
 	
 }
 

@@ -1,4 +1,4 @@
-package br.com.cmabreu;
+package br.com.cmabreu.threads;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

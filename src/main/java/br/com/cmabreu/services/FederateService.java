@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.com.cmabreu.FederateAmbassador;
-import br.com.cmabreu.FederateExecutorThread;
 import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.models.XPlaneAircraft;
-import br.com.cmabreu.udp.UDPServerThread;
+import br.com.cmabreu.threads.FederateExecutorThread;
+import br.com.cmabreu.threads.UDPServerThread;
 import hla.rti1516e.CallbackModel;
 import hla.rti1516e.RTIambassador;
 import hla.rti1516e.ResignAction;

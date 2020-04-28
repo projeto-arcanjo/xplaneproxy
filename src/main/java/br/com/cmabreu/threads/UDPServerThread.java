@@ -1,4 +1,4 @@
-package br.com.cmabreu.udp;
+package br.com.cmabreu.threads;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.com.cmabreu.services.XPlaneAircraftManager;
+import br.com.cmabreu.udp.XPlaneDataPacket;
 
 public class UDPServerThread implements Runnable {
     private DatagramSocket socket;

@@ -16,7 +16,13 @@ import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.models.XPlaneAircraft;
 import br.com.cmabreu.threads.FederateExecutorThread;
 import br.com.cmabreu.threads.UDPServerThread;
+import hla.rti1516e.AttributeHandleSet;
+import hla.rti1516e.AttributeHandleValueMap;
 import hla.rti1516e.CallbackModel;
+import hla.rti1516e.FederateAmbassador.SupplementalRemoveInfo;
+import hla.rti1516e.ObjectClassHandle;
+import hla.rti1516e.ObjectInstanceHandle;
+import hla.rti1516e.OrderType;
 import hla.rti1516e.RTIambassador;
 import hla.rti1516e.ResignAction;
 import hla.rti1516e.RtiFactoryFactory;
@@ -55,47 +61,19 @@ public class FederateService {
 	}
     
     public void startRti() throws Exception {
-    	// O Manager precisa ser assim para que possa ser acessado pelo UDPServerThread 
-    	// ( ele nao tem o RTIAmbassador que eh necessario para instanciar o Manager )
-    	
     	if( !fomFolder.endsWith("/") ) fomFolder = fomFolder + "/";
     	
-		/////////////////////////////////////////////////
-		// 1 & 2. create the RTIambassador and Connect //
-		/////////////////////////////////////////////////    	
 		createRtiAmbassador();
 		connect();
-		
-		//////////////////////////////
-		// 3. create the federation //
-		//////////////////////////////		
 		createFederation( federationName );
 		
-		////////////////////////////
-		// 4. join the federation //
-		////////////////////////////		
 		joinFederation( federationName, federateName);
-		
-
 		
 		XPlaneAircraftManager.startInstance( rtiamb );
 		
-		//////////////////////////////
-		// 8. publish               //
-		//////////////////////////////
-		// in this section we tell the RTI of all the data we are going to
-		// produce, and all the data we want to know about
-		publish();
-		logger.info( "Published" );		
-
-		
-		/////////////////////////////////////
-		// 10. do the main simulation loop //
-		/////////////////////////////////////
 		// Do not block the web browser interface!
 		this.federateExecutorThread = new FederateExecutorThread( this );
 		new Thread( this.federateExecutorThread ).start();
-		
 		
     	// Inicia o servidor UDP para ouvir o X-Plane
     	this.udpServerThread = new UDPServerThread( udpServerPort );
@@ -108,35 +86,27 @@ public class FederateService {
     	try {
 			rtiamb.evokeMultipleCallbacks( 0.1, 0.2 );
 		} catch ( CallNotAllowedFromWithinCallback e ) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch ( RTIinternalError e ) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
     
-	// This now can be called by a REST endpoint. See FederateController.quit()
     public void quit()  {
 	
     	( (FederateExecutorThread)this.federateExecutorThread ).finish();
     	( (UDPServerThread)this.udpServerThread ).finish();
     	
     	
-		////////////////////////////////////
-		// 12. resign from the federation //
-		////////////////////////////////////
 		try {
 			resignFederationExecution();
 			destroyFederation();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	
     }
     
-	// This now can be called by a REST endpoint. See FederateController.deleteObjectInstance()
 	public void deleteObjectInstance( int objectHandle ) throws Exception {
 		rtiamb.deleteObjectInstance( encoder.getObjectHandle( objectHandle ), generateTag() );
 		logger.info( "Deleted Object, handle=" + objectHandle );
@@ -147,13 +117,7 @@ public class FederateService {
 	}	
 
 	
-	// This method now will be fired by a REST endpoint. See FederateController.destroyFederation()
 	public void destroyFederation() {
-		////////////////////////////////////////
-		// 13. try and destroy the federation //
-		////////////////////////////////////////
-		// NOTE: we won't die if we can't do this because other federates
-		//       remain. in that case we'll leave it for them to clean up
 		try	{
 			rtiamb.destroyFederationExecution( federationName );
 			logger.info( "Destroyed Federation" );
@@ -167,7 +131,6 @@ public class FederateService {
 			logger.error( e.getMessage() + " : " + e.getCause() );
 		}
 		
-		// disconnect
 		try {
 			rtiamb.disconnect();
 			logger.info( "Disconnected" );
@@ -175,7 +138,6 @@ public class FederateService {
 			logger.error( e.getMessage() + " : " + e.getCause() );
 			e.printStackTrace();
 		}			
-		
 	}
     
     
@@ -192,8 +154,6 @@ public class FederateService {
 	}	
 	
 	private void createFederation( String federationName ) throws Exception {
-		// We attempt to create a new federation with the first three of the
-		// restaurant FOM modules covering processes, food and drink		
 		logger.info( "Creating Federation " + federationName );
 		try	{
 			URL[] modules = new URL[]{
@@ -230,19 +190,45 @@ public class FederateService {
 		return ( "XPLANE_" + System.currentTimeMillis()).getBytes();
 	}	
 	
-	public void publish() throws Exception {
-		// Quem vai publicar uma aeronave eh o software X-Plane quando enviar dados.
-		// Até la, nada de aviao por aqui.
-	}
-
 	public XPlaneAircraft spawn( String identificador ) throws Exception {
 		XPlaneAircraft aircraft = XPlaneAircraftManager.getInstance().spawn( identificador );
 		return aircraft;
 		
 	}
 
-	public XPlaneAircraft update( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) {
+	// Teste de atualizacao de aeronave. Vem pelo Controller e nao pelo X-Plane. 
+	// So para testar o codigo
+	public XPlaneAircraft updateTest( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) {
 		return XPlaneAircraftManager.getInstance().updateTest( identificador, lat, lon, alt, head, pitch, roll);
+	}
+
+	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes, byte[] userSuppliedTag) {
+		logger.warn("A RTI esta solicitando atualizacao de atributos");
+		try {
+			XPlaneAircraftManager.getInstance().updateAircraft( theObject );
+		} catch ( Exception e ) {
+			logger.error( e.getMessage() );
+		}
+	}
+
+	public void discoverObjectInstance(ObjectInstanceHandle theObject, ObjectClassHandle theObjectClass, String objectName) {
+		logger.warn("um novo objeto foi descoberto: " + objectName );
+		logger.warn("mas nao sei o que fazer ainda.");
+		try {
+			XPlaneAircraftManager.getInstance().requestUpdateAll( theObject );
+		} catch ( Exception e ) {
+			logger.error( e.getMessage() );
+		}
+	}
+
+	public void reflectAttributeValues(ObjectInstanceHandle theObject, AttributeHandleValueMap theAttributes, byte[] tag, OrderType sentOrder) {
+		logger.warn("A RTI esta enviando atualizacao de atributos");
+		logger.warn("mas nao sei o que fazer ainda.");
+	}
+
+	public void removeObjectInstance(ObjectInstanceHandle theObject, byte[] tag, OrderType orderType, SupplementalRemoveInfo supInfo) {
+		logger.warn("A RTI esta pedindo para apagar um objeto");
+		logger.warn("mas nao sei o que fazer ainda.");
 	}
 	
 	

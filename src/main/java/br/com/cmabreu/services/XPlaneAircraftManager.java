@@ -12,6 +12,7 @@ import hla.rti1516e.AttributeHandle;
 import hla.rti1516e.AttributeHandleSet;
 import hla.rti1516e.InteractionClassHandle;
 import hla.rti1516e.ObjectClassHandle;
+import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 
 public class XPlaneAircraftManager {
@@ -70,14 +71,20 @@ public class XPlaneAircraftManager {
 		attributes.add(isConcealedHandle);
 		attributes.add(entityIdentifierHandle);
 		attributes.add(damageStateHandle);
+		
+		// Vou publicar Platform.Aircraft
         this.rtiAmb.publishObjectClassAttributes( this.entityHandle, attributes );   
+		logger.info( "publicado como PhysicalEntity.Platform.Aircraft");		
+        
+    	// Tambem estou interessado em Platform.Aircraft
+        this.rtiAmb.subscribeObjectClassAttributes( this.entityHandle, attributes );
+		logger.info( "inscrevi para PhysicalEntity.Platform.Aircraft");		
         
         this.interactionHandle = this.rtiAmb.getInteractionClassHandle("Acknowledge");
         this.rtiAmb.publishInteractionClass(interactionHandle);
 	}
 
 	/* GETTERS e SETTERS */
-	
 	public RTIambassador getRtiAmb() {
 		return rtiAmb;
 	}
@@ -128,6 +135,15 @@ public class XPlaneAircraftManager {
 		return temp;
 	}
 	
+	public void updateAircraft( ObjectInstanceHandle objectInstanceHandle ) throws Exception {
+		for( XPlaneAircraft ac : aircrafts  ) {
+			if( ac.isMyHandle(objectInstanceHandle) ) {
+				ac.updateAllValues();
+				return;
+			}
+		}
+	}
+	
 	public void update( XPlaneDataPacket dataPacket ) throws Exception {
 		// Identifica o dado pelo nome do computador que enviou
 		String identificador = dataPacket.getHostName() ;
@@ -167,6 +183,11 @@ public class XPlaneAircraftManager {
 			}
 		}
 		return null;
+	}
+
+	
+	public void requestUpdateAll( ObjectInstanceHandle theObject ) throws Exception {
+		this.rtiAmb.requestAttributeValueUpdate( theObject, this.attributes, "XPLANE_ATTR_REQ".getBytes() );
 	}
 	
 	

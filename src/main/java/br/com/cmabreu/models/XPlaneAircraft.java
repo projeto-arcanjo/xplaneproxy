@@ -58,6 +58,9 @@ public class XPlaneAircraft implements Serializable {
 	private String identificador;
 	private Logger logger = LoggerFactory.getLogger( XPlaneAircraft.class );
 	
+	public boolean isMyHandle( ObjectInstanceHandle objectInstanceHandle ) {
+		return ( this.objectInstanceHandle.equals( objectInstanceHandle) );
+	}
 	
 	public boolean isMe( String identificador ) {
 		return identificador.equals( this.identificador );
@@ -166,7 +169,8 @@ public class XPlaneAircraft implements Serializable {
 		ahvm.put( manager.getDamageStateHandle(), encodedDamageState );
 		
 		// ENVIA O UPDATE PARA A RTI
-		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, null );
+		manager.getRtiAmb().updateAttributeValues( this.objectInstanceHandle, ahvm, "XPLANE_ALL_INFO".getBytes() );
+		logger.info("enviando atualizacao completa para a RTI");
 		
 	}
 	

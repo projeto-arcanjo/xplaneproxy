@@ -1,4 +1,4 @@
-package br.com.cmabreu.services;
+package br.com.cmabreu.managers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import hla.rti1516e.ObjectClassHandle;
 import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 
-public class XPlaneAircraftManager {
+public class XPlaneAircraftManager implements IManager {
 	private RTIambassador rtiAmb;
 	
 	private InteractionClassHandle interactionHandle;   
@@ -75,10 +75,6 @@ public class XPlaneAircraftManager {
 		// Vou publicar Platform.Aircraft
         this.rtiAmb.publishObjectClassAttributes( this.entityHandle, attributes );   
 		logger.info( "publicado como PhysicalEntity.Platform.Aircraft");		
-        
-    	// Tambem estou interessado em Platform.Aircraft
-        this.rtiAmb.subscribeObjectClassAttributes( this.entityHandle, attributes );
-		logger.info( "inscrevi para PhysicalEntity.Platform.Aircraft");		
         
         this.interactionHandle = this.rtiAmb.getInteractionClassHandle("Acknowledge");
         this.rtiAmb.publishInteractionClass(interactionHandle);

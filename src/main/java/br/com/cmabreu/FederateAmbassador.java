@@ -1,8 +1,5 @@
 package br.com.cmabreu;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import br.com.cmabreu.services.FederateService;
 import hla.rti1516e.AttributeHandleSet;
 import hla.rti1516e.AttributeHandleValueMap;
@@ -17,7 +14,7 @@ import hla.rti1516e.exceptions.FederateInternalError;
 
 public class FederateAmbassador extends NullFederateAmbassador {
 	private FederateService federateService;
-	private Logger logger = LoggerFactory.getLogger( FederateAmbassador.class );
+	//private Logger logger = LoggerFactory.getLogger( FederateAmbassador.class );
 
 
 	public FederateAmbassador( FederateService federateService ){

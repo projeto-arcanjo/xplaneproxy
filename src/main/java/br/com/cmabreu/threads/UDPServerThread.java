@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.cmabreu.services.XPlaneAircraftManager;
+import br.com.cmabreu.managers.XPlaneAircraftManager;
 import br.com.cmabreu.udp.XPlaneDataPacket;
 
 public class UDPServerThread implements Runnable {
@@ -43,9 +43,12 @@ public class UDPServerThread implements Runnable {
         	
         	try {
 	            socket.receive( packet );
+
+	            // Isso foi para testar a porta
+	            //for(int i=0; i< buffer.length ; i++) { System.out.print(buffer[i] +" ");  }	            
+	            
 	            byteBuffer = ByteBuffer.wrap( buffer ).order( ByteOrder.LITTLE_ENDIAN );
 	            XPlaneDataPacket dtp = new XPlaneDataPacket( packet.getAddress().getHostName(), byteBuffer.array() );
-	            
 	            XPlaneAircraftManager.getInstance().update( dtp );
 	            
         	} catch( SocketException se ) {

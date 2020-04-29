@@ -8,12 +8,16 @@ import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.com.cmabreu.FederateAmbassador;
+import br.com.cmabreu.managers.PlatformSurfaceManager;
+import br.com.cmabreu.managers.XPlaneAircraftManager;
 import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.models.XPlaneAircraft;
+import br.com.cmabreu.models.XPlaneObject;
 import br.com.cmabreu.threads.FederateExecutorThread;
 import br.com.cmabreu.threads.UDPServerThread;
 import hla.rti1516e.AttributeHandleSet;
@@ -42,6 +46,9 @@ public class FederateService {
 	private Runnable udpServerThread;
 	private Runnable federateExecutorThread;
 	
+	@Autowired
+	private ObjectService objectService;
+	
     @Value("${federation.fomfolder}")
     String fomFolder;	
 
@@ -52,7 +59,7 @@ public class FederateService {
     String federateName;	
 
     @Value("${udpserver.port}")
-    Integer udpServerPort; 
+    int udpServerPort; 
     
 	@PreDestroy
 	public void onExit() {
@@ -70,6 +77,10 @@ public class FederateService {
 		joinFederation( federationName, federateName);
 		
 		XPlaneAircraftManager.startInstance( rtiamb );
+
+		// Me interessa saber sobre navios... 
+		PlatformSurfaceManager.startInstance( rtiamb ); 
+
 		
 		// Do not block the web browser interface!
 		this.federateExecutorThread = new FederateExecutorThread( this );
@@ -201,6 +212,13 @@ public class FederateService {
 	public XPlaneAircraft updateTest( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) {
 		return XPlaneAircraftManager.getInstance().updateTest( identificador, lat, lon, alt, head, pitch, roll);
 	}
+	
+	
+	/*
+	 * 		METODOS QUE RESPONDEM PELO FEDERATE AMBASSADOR
+	 * 
+	 */
+	
 
 	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes, byte[] userSuppliedTag) {
 		logger.warn("A RTI esta solicitando atualizacao de atributos");
@@ -211,24 +229,54 @@ public class FederateService {
 		}
 	}
 
-	public void discoverObjectInstance(ObjectInstanceHandle theObject, ObjectClassHandle theObjectClass, String objectName) {
-		logger.warn("um novo objeto foi descoberto: " + objectName );
-		logger.warn("mas nao sei o que fazer ainda.");
+	public void discoverObjectInstance( ObjectInstanceHandle theObject, ObjectClassHandle theObjectClass, String objectName ) {
+		
+		String aircraftObjFile = "Resources/default scenery/sim objects/apt_aircraft/fighter/F4/F4_static.obj";
+		String vesselObjFile = "Custom Scenery/OpenSceneryX/objects/vehicles/boats_ships/container/2/object.obj";
+		
+		
 		try {
-			XPlaneAircraftManager.getInstance().requestUpdateAll( theObject );
+			
+			XPlaneObject newObj = null;
+			
+			// O que eh isso que esta chegando?
+			if( theObjectClass.equals( XPlaneAircraftManager.getInstance().getEntityHandle()  ) ) {
+				// Eh um BaseEntity.PhysicalEntity.Platform.Aircraft
+				// Guardo na lista
+				newObj = objectService.prepare(theObject, aircraftObjFile, "Aircraft", XPlaneAircraftManager.getInstance(), objectName );
+				// Peco seus atributos ao dono
+				XPlaneAircraftManager.getInstance().requestUpdateAll( theObject );
+			}
+
+			
+			if( theObjectClass.equals( PlatformSurfaceManager.getInstance().getEntityHandle()  ) ) {
+				// Eh um BaseEntity.PhysicalEntity.Platform.SurfaceVessel
+				// Guardo na lista
+				newObj = objectService.prepare(theObject, vesselObjFile, "SurfaceVessel", PlatformSurfaceManager.getInstance(), objectName );
+				// Peco seus atributos ao dono
+				PlatformSurfaceManager.getInstance().requestUpdateAll( theObject );
+			}
+
+			if( newObj == null ) {
+				logger.error("recebi um objeto novo " + objectName + " mas nao sei o que eh");
+			}
+			
 		} catch ( Exception e ) {
-			logger.error( e.getMessage() );
+			e.printStackTrace();
 		}
 	}
 
-	public void reflectAttributeValues(ObjectInstanceHandle theObject, AttributeHandleValueMap theAttributes, byte[] tag, OrderType sentOrder) {
-		logger.warn("A RTI esta enviando atualizacao de atributos");
-		logger.warn("mas nao sei o que fazer ainda.");
+	// Os atributos do objeto chegaram! 
+	public void reflectAttributeValues( ObjectInstanceHandle theObject, AttributeHandleValueMap theAttributes, byte[] tag, OrderType sentOrder ) {
+		try {
+			objectService.updateAttributes( theObject, theAttributes );
+		} catch ( Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void removeObjectInstance(ObjectInstanceHandle theObject, byte[] tag, OrderType orderType, SupplementalRemoveInfo supInfo) {
-		logger.warn("A RTI esta pedindo para apagar um objeto");
-		logger.warn("mas nao sei o que fazer ainda.");
+		//
 	}
 	
 	

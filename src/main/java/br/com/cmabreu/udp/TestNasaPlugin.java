@@ -41,7 +41,7 @@ public class TestNasaPlugin {
 		
 		double[] latLonEle = new double[3];
 		latLonEle[0] = -22.80103;
-		latLonEle[1] = -43.22729;
+		latLonEle[1] = -43.22829;
 		latLonEle[2] = 5.0;
 		
 		float[] psiThePhi = new float[3];
@@ -49,7 +49,7 @@ public class TestNasaPlugin {
 		psiThePhi[1] = (float)0.0;
 		psiThePhi[2] = (float)0.0;		
 		
-		xpc.sendOBJL( 66, latLonEle, psiThePhi, 0, 50000.0f );
+		xpc.sendOBJL( 66, latLonEle, psiThePhi, 0, 5.0f );
 		xpc.close();
 	}
 	
@@ -75,9 +75,9 @@ public class TestNasaPlugin {
 	public static void main(String[] args) {
 		
 		try {
-			//testSendOBJN();
-			//testSendOBJL();
-			testUpdateObject( (float)100);
+			testSendOBJN();
+			testSendOBJL();
+			//testUpdateObject( (float)100);
 			//testUpdateObject( (float)0.0 );
 		} catch (Exception e) {
 			e.printStackTrace();

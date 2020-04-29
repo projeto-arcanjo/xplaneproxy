@@ -942,11 +942,17 @@ public class XPlaneConnect implements AutoCloseable
 	}
 
 	
-	public void sendOBJL( long index, double[] latLonEle, float[] psiThePhi, long ground, float smoke ) throws IOException { 
+	public void sendOBJL( int index, double[] latLonEle, float[] psiThePhi, int ground, float smoke ) throws IOException {
+		
+		//https://forums.x-plane.org/index.php?/forums/topic/210870-solved-help-sending-udp-objl-objn-data/&tab=comments#comment-1907828
+		int paddingFake = 0;
+		
 	    //Convert data to bytes
 		ByteBuffer bb = ByteBuffer.allocate( 56 ); 
 		bb.order(ByteOrder.LITTLE_ENDIAN);
-		bb.putLong( index );
+
+		bb.putInt( index );
+		bb.putInt( paddingFake );
 
 		double lat = latLonEle[0];		// -22.80103;
 		double lon = latLonEle[1];		// -43.22729;
@@ -962,8 +968,9 @@ public class XPlaneConnect implements AutoCloseable
 		bb.putFloat( psi );
 		bb.putFloat( the );
 		bb.putFloat( phi );
-		bb.putLong( ground );
+		bb.putInt( ground );
 		bb.putFloat( smoke );	
+		bb.putInt( paddingFake );
 		
 	    //Build and send message
 	    ByteArrayOutputStream os = new ByteArrayOutputStream();

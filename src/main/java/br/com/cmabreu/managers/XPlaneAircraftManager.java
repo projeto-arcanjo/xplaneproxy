@@ -140,7 +140,7 @@ public class XPlaneAircraftManager implements IManager {
 		}
 	}
 	
-	public void update( XPlaneDataPacket dataPacket ) throws Exception {
+	public synchronized void update( XPlaneDataPacket dataPacket ) throws Exception {
 		// Identifica o dado pelo nome do computador que enviou
 		String identificador = dataPacket.getHostName() ;
 		

@@ -19,6 +19,7 @@ public class UDPServerThread implements Runnable {
 	private ByteBuffer byteBuffer;
 	private Logger logger = LoggerFactory.getLogger( UDPServerThread.class );
 	private int port;
+	private XPlaneAircraftManager manager;
 	
 	public void finish() {
 		this.socket.close();
@@ -26,6 +27,7 @@ public class UDPServerThread implements Runnable {
 	}
 	
     public UDPServerThread( int port ) {
+    	this.manager = XPlaneAircraftManager.getInstance();
     	this.port = port;
     	try {
     		socket = new DatagramSocket( port );
@@ -49,7 +51,7 @@ public class UDPServerThread implements Runnable {
 	            
 	            byteBuffer = ByteBuffer.wrap( buffer ).order( ByteOrder.LITTLE_ENDIAN );
 	            XPlaneDataPacket dtp = new XPlaneDataPacket( packet.getAddress().getHostName(), byteBuffer.array() );
-	            XPlaneAircraftManager.getInstance().update( dtp );
+	            this.manager.update( dtp );
 	            
         	} catch( SocketException se ) {
         		logger.error( se.getMessage() );

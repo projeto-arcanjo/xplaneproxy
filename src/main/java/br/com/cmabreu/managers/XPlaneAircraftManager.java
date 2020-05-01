@@ -157,10 +157,8 @@ public class XPlaneAircraftManager implements IManager {
 		
 		// Se eu cheguei aqui eh porque nao tenho essa aeronave ainda.
 		// Preciso criar uma nova.
-		XPlaneAircraft temp = this.spawn(identificador);
+		this.spawn(identificador).update(dataPacket);
 		
-		// E ja atualizo suas informacoes!
-		temp.update(dataPacket);
 		
 	}
 

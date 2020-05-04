@@ -127,7 +127,6 @@ public class ObjectService {
 				if( !object.isActive() ) {
 					xpc.sendOBJN( object.getIndex(), object.getObjectPath() );
 					object.activate();
-					logger.info("ativando " + object.getIndex() + " : " + object.getObjectName() );
 				}
 				
 				return object;

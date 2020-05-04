@@ -78,6 +78,10 @@ public class XPlaneAircraftManager implements IManager {
         
         this.interactionHandle = this.rtiAmb.getInteractionClassHandle("Acknowledge");
         this.rtiAmb.publishInteractionClass(interactionHandle);
+        
+        // Também estou interessado em Platform.Aircrafts
+        this.rtiAmb.subscribeObjectClassAttributes( this.entityHandle, attributes );   
+
 	}
 
 	/* GETTERS e SETTERS */

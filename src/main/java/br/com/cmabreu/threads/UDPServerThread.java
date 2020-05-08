@@ -51,7 +51,7 @@ public class UDPServerThread implements Runnable {
 	            
 	            byteBuffer = ByteBuffer.wrap( buffer ).order( ByteOrder.LITTLE_ENDIAN );
 	            XPlaneDataPacket dtp = new XPlaneDataPacket( packet.getAddress().getHostName(), byteBuffer.array() );
-	            this.manager.update( dtp );
+	            this.manager.sendAircraftToRTI( dtp );
 	            
         	} catch( SocketException se ) {
         		logger.error( se.getMessage() );

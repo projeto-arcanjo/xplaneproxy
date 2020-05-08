@@ -16,7 +16,7 @@ public class XPlaneObject implements Serializable {
 	private ObjectInstanceHandle instanceHandle;
 	private String className;
 	private String objectName;
-	private IManager manager;;
+	private IManager manager;
 	private Codec codec;
 	private Environment env;
 	
@@ -196,6 +196,7 @@ public class XPlaneObject implements Serializable {
 			byte[] attributeData = theAttributes.get(attributeHandle);
 			
 			// Procura que atributo eh esse
+			// Para manter generico so vou processar os dados de orientação e posição
 			if( attributeHandle.equals( this.manager.getSpatialHandle() ) ) {
 				processaSpatial( attributeData );
 			}
@@ -221,6 +222,9 @@ public class XPlaneObject implements Serializable {
 		this.phi = orientation[ SpatialVariant.PHI ]; 
 		this.the = orientation[ SpatialVariant.THETA ]; 
 		this.psi = orientation[ SpatialVariant.PSI ];
+		
+		System.out.println(" > Recebi " + this.getObjectName() + " " + this.getClassName() );
+		System.out.println(" > (" + this.lat + "," + this.lon + "," + this.ele + ") (" + this.phi + "," + this.the + "," + this.psi + ")" );
 	}
 
 	public void setObjectName(String objectName) {

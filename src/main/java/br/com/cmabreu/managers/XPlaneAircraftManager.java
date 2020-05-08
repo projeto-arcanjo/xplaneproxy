@@ -135,7 +135,9 @@ public class XPlaneAircraftManager implements IManager {
 		return temp;
 	}
 	
-	public void updateAircraft( ObjectInstanceHandle objectInstanceHandle ) throws Exception {
+	
+	// A RTI solicitou uma atualização de atributos
+	public synchronized void sendAircraftToRTI( ObjectInstanceHandle objectInstanceHandle ) throws Exception {
 		for( XPlaneAircraft ac : aircrafts  ) {
 			if( ac.isMyHandle(objectInstanceHandle) ) {
 				ac.updateAllValues();
@@ -144,7 +146,8 @@ public class XPlaneAircraftManager implements IManager {
 		}
 	}
 	
-	public synchronized void update( XPlaneDataPacket dataPacket ) throws Exception {
+	// O X-Plane enviou uma atualização de atributos. Enviar para a RTI
+	public synchronized void sendAircraftToRTI( XPlaneDataPacket dataPacket ) throws Exception {
 		// Identifica o dado pelo nome do computador que enviou
 		String identificador = dataPacket.getHostName() ;
 		

@@ -223,7 +223,7 @@ public class FederateService {
 	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes, byte[] userSuppliedTag) {
 		logger.warn("A RTI esta solicitando atualizacao de atributos");
 		try {
-			XPlaneAircraftManager.getInstance().updateAircraft( theObject );
+			XPlaneAircraftManager.getInstance().sendAircraftToRTI( theObject );
 		} catch ( Exception e ) {
 			logger.error( e.getMessage() );
 		}

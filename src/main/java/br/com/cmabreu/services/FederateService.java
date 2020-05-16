@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.cmabreu.FederateAmbassador;
 import br.com.cmabreu.managers.PlatformSurfaceManager;
-import br.com.cmabreu.managers.XPlaneAircraftManager;
+import br.com.cmabreu.managers.PlatformAircraftManager;
 import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.models.XPlaneAircraft;
 import br.com.cmabreu.models.XPlaneObject;
@@ -76,7 +76,7 @@ public class FederateService {
 		
 		joinFederation( federationName, federateName);
 		
-		XPlaneAircraftManager.startInstance( rtiamb );
+		PlatformAircraftManager.startInstance( rtiamb );
 
 		// Me interessa saber sobre navios... 
 		PlatformSurfaceManager.startInstance( rtiamb ); 
@@ -202,7 +202,7 @@ public class FederateService {
 	}	
 	
 	public XPlaneAircraft spawn( String identificador ) throws Exception {
-		XPlaneAircraft aircraft = XPlaneAircraftManager.getInstance().spawn( identificador );
+		XPlaneAircraft aircraft = PlatformAircraftManager.getInstance().spawn( identificador );
 		return aircraft;
 		
 	}
@@ -210,7 +210,7 @@ public class FederateService {
 	// Teste de atualizacao de aeronave. Vem pelo Controller e nao pelo X-Plane. 
 	// So para testar o codigo
 	public XPlaneAircraft updateTest( String identificador, float lat, float lon, float alt, float head, float pitch, float roll ) {
-		return XPlaneAircraftManager.getInstance().updateTest( identificador, lat, lon, alt, head, pitch, roll);
+		return PlatformAircraftManager.getInstance().updateTest( identificador, lat, lon, alt, head, pitch, roll);
 	}
 	
 	
@@ -223,7 +223,7 @@ public class FederateService {
 	public void provideAttributeValueUpdate(ObjectInstanceHandle theObject, AttributeHandleSet theAttributes, byte[] userSuppliedTag) {
 		logger.warn("A RTI esta solicitando atualizacao de atributos");
 		try {
-			XPlaneAircraftManager.getInstance().sendAircraftToRTI( theObject );
+			PlatformAircraftManager.getInstance().sendAircraftToRTI( theObject );
 		} catch ( Exception e ) {
 			logger.error( e.getMessage() );
 		}
@@ -240,12 +240,12 @@ public class FederateService {
 			XPlaneObject newObj = null;
 			
 			// O que eh isso que esta chegando?
-			if( theObjectClass.equals( XPlaneAircraftManager.getInstance().getEntityHandle()  ) ) {
+			if( theObjectClass.equals( PlatformAircraftManager.getInstance().getEntityHandle()  ) ) {
 				// Eh um BaseEntity.PhysicalEntity.Platform.Aircraft
 				// Guardo na lista
-				newObj = objectService.prepare(theObject, aircraftObjFile, "Aircraft", XPlaneAircraftManager.getInstance(), objectName );
+				newObj = objectService.prepare(theObject, aircraftObjFile, "Aircraft", PlatformAircraftManager.getInstance(), objectName );
 				// Peco seus atributos ao dono
-				XPlaneAircraftManager.getInstance().requestUpdateAll( theObject );
+				PlatformAircraftManager.getInstance().requestUpdateAll( theObject );
 			}
 
 			

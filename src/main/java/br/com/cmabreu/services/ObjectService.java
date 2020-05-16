@@ -26,12 +26,15 @@ public class ObjectService {
 	private XPlaneConnect xpc; 
 	private Logger logger = LoggerFactory.getLogger( ObjectService.class );
 	private List<XPlaneObject> objects;
-	
+	private boolean autoUpdate = true; 
     @Value("${xplane.address}")
     String xplaneAddress;		
 	
     @Scheduled(fixedRate = 1000)
     private void updateObjectsInXPlane() {
+    	
+    	if( ! this.autoUpdate ) return;
+    	
     	if( objects.size() > 0 ) {
 			for( XPlaneObject object : objects ) {
 				try {
@@ -41,6 +44,12 @@ public class ObjectService {
 				}
 			}
     	}
+    }
+    
+
+    public void setAutoUpdate( boolean autoUpdate ) {
+    	logger.info("Auto update ajustado para " + autoUpdate );
+    	this.autoUpdate = autoUpdate;
     }
     
     @PostConstruct

@@ -15,7 +15,7 @@ import hla.rti1516e.ObjectClassHandle;
 import hla.rti1516e.ObjectInstanceHandle;
 import hla.rti1516e.RTIambassador;
 
-public class XPlaneAircraftManager implements IManager {
+public class PlatformAircraftManager implements IManager {
 	private RTIambassador rtiAmb;
 	
 	private InteractionClassHandle interactionHandle;   
@@ -32,18 +32,18 @@ public class XPlaneAircraftManager implements IManager {
 	protected AttributeHandle damageStateHandle;
 	
 	private List<XPlaneAircraft> aircrafts;
-	private static XPlaneAircraftManager instance;
-	private Logger logger = LoggerFactory.getLogger( XPlaneAircraftManager.class );
+	private static PlatformAircraftManager instance;
+	private Logger logger = LoggerFactory.getLogger( PlatformAircraftManager.class );
 	
-	public static XPlaneAircraftManager getInstance() {
+	public static PlatformAircraftManager getInstance() {
 		return instance;
 	}
 	
 	public static void startInstance( RTIambassador rtiAmb ) throws Exception {
-		instance = new XPlaneAircraftManager( rtiAmb );
+		instance = new PlatformAircraftManager( rtiAmb );
 	}
 	
-	private XPlaneAircraftManager( RTIambassador rtiAmb ) throws Exception {
+	private PlatformAircraftManager( RTIambassador rtiAmb ) throws Exception {
 		logger.info("X-Plane Aircraft Manager ativo");
 		this.aircrafts = new ArrayList<XPlaneAircraft>();
 		this.rtiAmb = rtiAmb;

@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import br.com.cmabreu.managers.XPlaneAircraftManager;
+import br.com.cmabreu.managers.PlatformAircraftManager;
 import br.com.cmabreu.udp.XPlaneDataPacket;
 
 public class UDPServerThread implements Runnable {
@@ -19,7 +19,7 @@ public class UDPServerThread implements Runnable {
 	private ByteBuffer byteBuffer;
 	private Logger logger = LoggerFactory.getLogger( UDPServerThread.class );
 	private int port;
-	private XPlaneAircraftManager manager;
+	private PlatformAircraftManager manager;
 	
 	public void finish() {
 		this.socket.close();
@@ -27,7 +27,7 @@ public class UDPServerThread implements Runnable {
 	}
 	
     public UDPServerThread( int port ) {
-    	this.manager = XPlaneAircraftManager.getInstance();
+    	this.manager = PlatformAircraftManager.getInstance();
     	this.port = port;
     	try {
     		socket = new DatagramSocket( port );

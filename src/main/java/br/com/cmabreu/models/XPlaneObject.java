@@ -224,7 +224,7 @@ public class XPlaneObject implements Serializable {
 		this.psi = orientation[ SpatialVariant.PSI ];
 		
 		System.out.println(" > Recebi " + this.getObjectName() + " " + this.getClassName() );
-		System.out.println(" > (" + this.lat + "," + this.lon + "," + this.ele + ") (" + this.phi + "," + this.the + "," + this.psi + ")" );
+		System.out.println("   > (" + this.lat + "," + this.lon + "," + this.ele + ") (phi=" + this.phi + ", the=" + this.the + ", psi=" + this.psi + ")" );
 	}
 
 	public void setObjectName(String objectName) {

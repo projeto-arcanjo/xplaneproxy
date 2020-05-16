@@ -45,6 +45,16 @@ public class ObjectController {
 	}
 	*/
 	
+	@RequestMapping(value = "/autoupdate", method = RequestMethod.GET )
+	public void sendText( @RequestParam(value = "autoupdate", required = true) Boolean autoUpdate ) {
+		try {
+			objectService.setAutoUpdate( autoUpdate );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	@RequestMapping(value = "/aircraft/data/{aircraftNumber}", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_UTF8_VALUE )
 	public @ResponseBody AircraftData getAircraftData( @PathVariable("aircraftNumber") Integer aircraftNumber ) {
 		try {

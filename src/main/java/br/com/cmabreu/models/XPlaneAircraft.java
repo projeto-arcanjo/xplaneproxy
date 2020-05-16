@@ -11,7 +11,7 @@ import br.com.cmabreu.codec.EntityType;
 import br.com.cmabreu.codec.ForceIdentifier;
 import br.com.cmabreu.codec.Marking;
 import br.com.cmabreu.codec.SpatialVariant;
-import br.com.cmabreu.managers.XPlaneAircraftManager;
+import br.com.cmabreu.managers.PlatformAircraftManager;
 import br.com.cmabreu.misc.EncoderDecoder;
 import br.com.cmabreu.misc.Environment;
 import br.com.cmabreu.udp.XPlaneData;
@@ -30,7 +30,7 @@ import hla.rti1516e.encoding.EncoderFactory;
 public class XPlaneAircraft implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private ObjectInstanceHandle objectInstanceHandle;
-	private XPlaneAircraftManager manager;
+	private PlatformAircraftManager manager;
 	private EncoderFactory encoderFactory;
 	private Environment env;
 	private Codec codec;
@@ -71,7 +71,7 @@ public class XPlaneAircraft implements Serializable {
 					NETN-FOM.pdf 
 	*/
 	
-	public XPlaneAircraft( XPlaneAircraftManager manager, String identificador ) throws Exception {
+	public XPlaneAircraft( PlatformAircraftManager manager, String identificador ) throws Exception {
 		this.objectInstanceHandle = manager.getRtiAmb().registerObjectInstance( manager.getEntityHandle() );
 		this.encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory(); 
 		this.manager = manager;

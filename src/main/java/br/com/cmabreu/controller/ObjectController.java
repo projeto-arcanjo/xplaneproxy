@@ -21,32 +21,8 @@ public class ObjectController {
 	@Autowired
 	private ObjectService objectService;
 	
-	/*
-	@RequestMapping(value = "/testport", method = RequestMethod.GET )
-	public void testPort() {
-		try {
-			UDPClient cc = new UDPClient("192.168.0.76", 49003);
-			
-			ByteBuffer bb = ByteBuffer.allocate( 24 ); 
-			bb.order(ByteOrder.LITTLE_ENDIAN);
-			bb.putDouble( -22.80103 );
-			bb.putDouble( -43.22829 );
-			bb.putDouble( 5.0 );			
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			os.write( bb.array() );
-			cc.sendData( os.toByteArray() );
-			
-			os.close();
-			cc.close();
-			
-		} catch ( Exception e ) {
-			e.printStackTrace();
-		}
-	}
-	*/
-	
 	@RequestMapping(value = "/autoupdate", method = RequestMethod.GET )
-	public void sendText( @RequestParam(value = "autoupdate", required = true) Boolean autoUpdate ) {
+	public void setAutoUpdate( @RequestParam(value = "autoupdate", required = true) Boolean autoUpdate ) {
 		try {
 			objectService.setAutoUpdate( autoUpdate );
 		} catch ( Exception e ) {
